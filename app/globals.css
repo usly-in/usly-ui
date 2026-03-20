@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@keyframes draw {
+  from { stroke-dashoffset: 800; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.usly-text {
+  stroke-dasharray: 800;
+  stroke-dashoffset: 800;
+  animation: draw 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+}
+
+:root {
+  --background: #0b0b0b;
+  --foreground: #f5f5f5;
+  --surface: #141414;
+  --surface-2: #1c1c1c;
+  --border: #2a2a2a;
+  --accent: #e4a0a0;
+  --accent-dim: #c47a7a;
+  --accent-muted: rgba(228, 160, 160, 0.1);
+  --accent-ring: rgba(228, 160, 160, 0.3);
+  --muted: #888888;
+  --rose: #e4a0a0;
+  --rose-dim: rgba(228, 160, 160, 0.15);
+}
+
+/* Group themes — applied via data-theme on the app layout wrapper */
+[data-theme="lover"] {
+  --accent: #e4a0a0;
+  --accent-dim: #c47a7a;
+  --accent-muted: rgba(228, 160, 160, 0.1);
+  --accent-ring: rgba(228, 160, 160, 0.3);
+}
+
+[data-theme="family"] {
+  --accent: #f0a070;
+  --accent-dim: #d07840;
+  --accent-muted: rgba(240, 160, 112, 0.1);
+  --accent-ring: rgba(240, 160, 112, 0.3);
+}
+
+[data-theme="friends"] {
+  --accent: #70b8e0;
+  --accent-dim: #4090c0;
+  --accent-muted: rgba(112, 184, 224, 0.1);
+  --accent-ring: rgba(112, 184, 224, 0.3);
+}
+
+[data-theme="custom"] {
+  --accent: #a0a0e4;
+  --accent-dim: #7070c4;
+  --accent-muted: rgba(160, 160, 228, 0.1);
+  --accent-ring: rgba(160, 160, 228, 0.3);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Prose overrides for dark theme */
+.prose {
+  color: var(--foreground);
+}
+.prose h1, .prose h2, .prose h3 {
+  color: var(--foreground);
+}
+.prose a {
+  color: var(--accent);
+}
+.prose strong {
+  color: var(--foreground);
+}
+.prose blockquote {
+  border-left-color: var(--accent);
+  color: var(--muted);
+}
+.prose code {
+  background: var(--surface-2);
+  color: var(--accent);
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+}
+.prose pre {
+  background: var(--surface-2);
+}
+
+/* Transitions */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Sealed letter animation */
+.sealed {
+  filter: blur(2px);
+  user-select: none;
+  pointer-events: none;
+}
