@@ -25,23 +25,20 @@ export function UploadZone({ onFilesSelected, maxFiles = 6, className }: UploadZ
       });
       if (!valid.length) return;
 
-      setFiles((prev) => {
-        const merged = [...prev, ...valid].slice(0, maxFiles);
-        onFilesSelected(merged);
+      const merged = [...files, ...valid].slice(0, maxFiles);
+      setFiles(merged);
+      onFilesSelected(merged);
 
-        // Generate previews for new files
-        valid.slice(0, maxFiles - prev.length).forEach((f) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            setPreviews((pp) => [...pp, e.target?.result as string].slice(0, maxFiles));
-          };
-          reader.readAsDataURL(f);
-        });
-
-        return merged;
+      // Generate previews for new files
+      valid.slice(0, maxFiles - files.length).forEach((f) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setPreviews((pp) => [...pp, e.target?.result as string].slice(0, maxFiles));
+        };
+        reader.readAsDataURL(f);
       });
     },
-    [maxFiles, onFilesSelected]
+    [files, maxFiles, onFilesSelected]
   );
 
   const removeFile = (idx: number) => {

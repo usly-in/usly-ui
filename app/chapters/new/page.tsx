@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import api from "@/lib/api";
 
-const MarkdownEditor = dynamic(
-  () => import("@/components/MarkdownEditor").then((m) => m.MarkdownEditor),
+const TipTapEditor = dynamic(
+  () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
   { ssr: false }
 );
 
@@ -56,13 +57,13 @@ export default function NewChapterPage() {
           className="w-full px-4 py-3.5 rounded-2xl bg-[#141414] border border-[#2a2a2a] text-[#f5f5f5] placeholder-[#555] focus:outline-none focus:border-[#e4a0a0]/60 transition-colors text-base"
         />
 
-        <input
-          type="date" value={eventDate}
-          onChange={(e) => setEventDate(e.target.value)}
-          className="w-full px-4 py-3.5 rounded-2xl bg-[#141414] border border-[#2a2a2a] text-[#f5f5f5] focus:outline-none focus:border-[#e4a0a0]/60 transition-colors text-sm [color-scheme:dark]"
+        <DatePicker
+          value={eventDate}
+          onChange={setEventDate}
+          placeholder="When did this happen? (optional)"
         />
 
-        <MarkdownEditor value={content} onChange={setContent} height={450} />
+        <TipTapEditor value={content} onChange={setContent} placeholder="Tell your story…" height={450} />
 
         <div className="flex justify-end gap-2 pt-2">
           <Link href="/chapters" className="px-4 py-2.5 rounded-xl text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">Cancel</Link>

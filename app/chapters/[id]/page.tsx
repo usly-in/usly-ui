@@ -6,15 +6,9 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Trash2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
 import { useSession } from "next-auth/react";
-
-const MDPreview = dynamic(
-  () => import("@/components/MarkdownEditor").then((m) => m.MDPreview),
-  { ssr: false }
-);
 
 export default function ChapterDetailPage() {
   const params = useParams();
@@ -82,9 +76,10 @@ export default function ChapterDetailPage() {
             className="w-full rounded-2xl object-cover mb-8 max-h-80" />
         )}
 
-        <div data-color-mode="dark">
-          <MDPreview source={chapter.content ?? ""} className="prose prose-sm" />
-        </div>
+        <div
+          className="prose prose-invert prose-sm max-w-none text-[#f5f5f5]"
+          dangerouslySetInnerHTML={{ __html: chapter.content ?? "" }}
+        />
       </motion.article>
     </div>
   );

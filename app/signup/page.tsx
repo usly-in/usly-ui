@@ -5,6 +5,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ArrowRight, Loader2, Star, Sparkles, UserCircle2, ArrowLeft } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
 import { clsx } from "clsx";
 import api from "@/lib/api";
 import type { GroupType, UserGroup } from "@/types";
@@ -222,11 +223,11 @@ export default function SignupPage() {
             <p className="text-[#888] text-sm mb-6">
               {form.groupType === "lover" ? "Your anniversary or the day you met." : "A founding date, birthday, or anything special."} (Optional)
             </p>
-            <input
-              type="date"
+            <DatePicker
               value={form.startDate}
-              onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
-              className="w-full px-4 py-3.5 rounded-2xl bg-[#141414] border border-[#2a2a2a] text-[#f5f5f5] focus:outline-none transition-colors text-base mb-4 scheme-dark"
+              onChange={(v) => setForm((p) => ({ ...p, startDate: v }))}
+              placeholder="When did your story begin?"
+              className="mb-4"
             />
             <button onClick={handleCreateTenant} disabled={loading}
               className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl font-medium transition-all disabled:opacity-60 text-[#0b0b0b]"

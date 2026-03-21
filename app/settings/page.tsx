@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Save } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
 import api from "@/lib/api";
 import type { Tenant, UploadResponse } from "@/types";
 import { UploadZone } from "@/components/UploadZone";
@@ -71,10 +72,11 @@ export default function SettingsPage() {
         {/* Start date */}
         <div>
           <label className="text-xs font-medium text-[#888] mb-2 block">Your anniversary / start date</label>
-          <input
-            type="date" value={form.startDate}
-            onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
-            className="w-full px-4 py-3.5 rounded-2xl bg-[#141414] border border-[#2a2a2a] text-[#f5f5f5] focus:outline-none focus:border-[#e4a0a0]/60 transition-colors text-sm [color-scheme:dark]"
+          <DatePicker
+            value={form.startDate}
+            onChange={(v) => setForm((p) => ({ ...p, startDate: v }))}
+            placeholder="Pick a start date"
+            placement="down"
           />
         </div>
 
