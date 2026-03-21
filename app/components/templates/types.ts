@@ -1,17 +1,17 @@
 export interface TemplateProps {
-  title: string;
-  caption?: string;
+  readonly title: string;
+  readonly caption?: string;
   /** Plain text or TipTap HTML. Templates handle both in view mode. */
-  story?: string;
+  readonly story?: string;
   /** Image URLs (blob preview while editing, S3 URLs when viewing). */
-  images?: string[];
-  eventDate?: string;
-  editMode?: boolean;
-  onTitleChange?: (v: string) => void;
-  onCaptionChange?: (v: string) => void;
-  onStoryChange?: (v: string) => void;
+  readonly images?: readonly string[];
+  readonly eventDate?: string;
+  readonly editMode?: boolean;
+  readonly onTitleChange?: (v: string) => void;
+  readonly onCaptionChange?: (v: string) => void;
+  readonly onStoryChange?: (v: string) => void;
   /** Called when user clicks an image slot — parent opens file picker. */
-  onImageSlotClick?: (index: number) => void;
+  readonly onImageSlotClick?: (index: number) => void;
 }
 
 export interface TemplateEntry {
