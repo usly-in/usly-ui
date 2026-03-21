@@ -54,7 +54,7 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl">
+    <div className="p-6 md:p-8">
       <h1 className="text-2xl font-light tracking-tight text-[#f5f5f5] mb-1">Settings</h1>
       <p className="text-sm text-[#888] mb-8">Manage your memory lane</p>
 

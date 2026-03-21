@@ -47,7 +47,7 @@ export default function InvitationsPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl">
+    <div className="p-6 md:p-8">
       <InviteModal open={showModal} onClose={() => setShowModal(false)} onInvited={fetchInvitations} />
 
       <div className="flex items-center justify-between mb-8">

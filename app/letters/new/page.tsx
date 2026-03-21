@@ -41,7 +41,7 @@ export default function NewLetterPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl">
+    <div className="p-6 md:p-8">
       <div className="flex items-center gap-3 mb-8">
         <Link href="/letters" className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#2a2a2a] text-[#888] hover:text-[#f5f5f5] hover:border-[#888]/40 transition-all">
           <ArrowLeft className="w-4 h-4" />

@@ -37,7 +37,7 @@ export default function MemoryDetailPage() {
 
   if (item.locked) {
     return (
-      <div className="p-6 md:p-8 max-w-2xl">
+      <div className="p-6 md:p-8">
         <Link href={backHref} className="inline-flex items-center gap-2 mb-8 text-sm text-[#888] hover:text-[#f5f5f5]">
           <ArrowLeft className="w-4 h-4" /> Back
         </Link>
@@ -63,7 +63,7 @@ export default function MemoryDetailPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl">
+    <div className="p-6 md:p-8">
       <Link href={backHref} className="inline-flex items-center gap-2 mb-8 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
