@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
+import MomentTemplateRenderer from "@/app/components/MomentTemplateRenderer";
 
 export default function MemoryDetailPage() {
   const params = useParams();
@@ -60,6 +61,28 @@ export default function MemoryDetailPage() {
     allImages = [{ fullUrl: item.imageUrl }];
   } else {
     allImages = [];
+  }
+
+  // ── Template moment: render inside the chosen WordPress-style layout ──
+  if (isMoment && item.templateId) {
+    const imageUrls = allImages.map((i) => i.fullUrl);
+    return (
+      <div className="p-6 md:p-8">
+        <Link href={backHref} className="inline-flex items-center gap-2 mb-8 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </Link>
+        <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          <MomentTemplateRenderer
+            templateId={item.templateId}
+            title={item.title}
+            caption={item.caption}
+            story={item.content}
+            images={imageUrls}
+            eventDate={item.eventDate}
+          />
+        </motion.article>
+      </div>
+    );
   }
 
   return (

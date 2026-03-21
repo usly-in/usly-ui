@@ -91,6 +91,7 @@ export interface ContentItem {
   eventDate?: string;
   openAt?: string;           // ISO date — letter is locked until this date
   locked?: boolean;          // computed by backend when openAt is in future
+  templateId?: string;       // built-in template used to create this moment
 }
 
 // Invitation
