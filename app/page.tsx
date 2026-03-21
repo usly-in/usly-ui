@@ -64,7 +64,22 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#0b0b0b] text-[#f5f5f5] flex flex-col">
       {/* Hero */}
       <section className="relative flex-1 flex flex-col items-center justify-center text-center px-6 pt-24 pb-32 overflow-hidden">
-        <ShaderHero />
+        {/* Background video — blurred living-photo layer */}
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover blur-sm brightness-[0.22] opacity-75"
+            src="/landing-page/memories.mp4"
+          />
+        </div>
+
+        {/* ShaderHero animated fog on top of video */}
+        <div className="absolute inset-0 opacity-55 pointer-events-none">
+          <ShaderHero />
+        </div>
 
         {/* Nav */}
         <nav className="fixed top-0 inset-x-0 z-50 border-b border-[#2a2a2a] backdrop-blur-sm">

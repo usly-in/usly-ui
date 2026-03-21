@@ -31,7 +31,7 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (session && session.user && !session.user.tenantId && !pathname.startsWith("/signup") && !pathname.startsWith("/api")) {
+  if (session && session.user && !session.user.tenantId && !pathname.startsWith("/signup") && !pathname.startsWith("/login") && pathname !== "/" && !pathname.startsWith("/api")) {
     // Authenticated via Google but no tenant yet → must complete onboarding
     return NextResponse.redirect(new URL("/signup?onboarding=1", nextUrl.origin));
   }

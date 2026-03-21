@@ -33,6 +33,13 @@ export default function SignupPage() {
     if (isNewGroup && session && step === "welcome") setStep("group");
   }, [session, isNewGroup, step]);
 
+  // If user already has groups and this isn't a new-group flow, they're already registered
+  useEffect(() => {
+    if (!isNewGroup && session?.user?.groups && session.user.groups.length > 0) {
+      router.replace("/dashboard");
+    }
+  }, [session, isNewGroup, router]);
+
   const handleGoogleSignIn = () => {
     signIn("google", { callbackUrl: "/signup?onboarding=1" });
   };
@@ -119,7 +126,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6">
-      <button onClick={() => router.push("/dashboard")} className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
+      <button onClick={() => router.push(isNewGroup ? "/dashboard" : "/")} className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Back
       </button>
