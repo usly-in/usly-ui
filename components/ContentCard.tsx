@@ -47,7 +47,7 @@ export function ContentCard({ item, onClick, onDelete }: ContentCardProps) {
   return (
     <div className="relative group/card">
       <Link
-        href={`/memory/${item.contentId}`}
+        href={item.type === "moment" ? `/moments/${item.contentId}` : `/memory/${item.contentId}`}
         onClick={onClick}
         className="group block rounded-2xl border border-[#2a2a2a] bg-[#141414] hover:border-[#e4a0a0]/30 transition-all overflow-hidden"
       >

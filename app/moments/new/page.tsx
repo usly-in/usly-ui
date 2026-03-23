@@ -10,7 +10,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { UploadResponse } from "@/types";
-import { TEMPLATE_LIST, TEMPLATE_MAP } from "@/app/components/templates";
+import { TEMPLATE_LIST, TEMPLATE_MAP } from "../templates";
 
 const TipTapEditor = dynamic(
   () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
