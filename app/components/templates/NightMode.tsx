@@ -17,7 +17,7 @@ export function NightMode({
   onCaptionChange,
   onStoryChange,
   onImageSlotClick,
-}: Readonly<TemplateProps>) {
+}: TemplateProps) {
   return (
     <div
       className="w-full font-sans bg-[#050810] overflow-hidden"
