@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
 
+# Grant workflow the minimum permissions required to push to the repo
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
