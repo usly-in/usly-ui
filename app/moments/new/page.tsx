@@ -10,7 +10,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { UploadResponse } from "@/types";
-import { TEMPLATE_LIST, TEMPLATE_MAP } from "@/app/components/templates";
+import { TEMPLATE_LIST, TEMPLATE_MAP } from "../templates";
 
 const TipTapEditor = dynamic(
   () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
@@ -30,7 +30,18 @@ export default function NewMomentPage() {
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   // Blob preview URLs for template image slots (generated from File objects)
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  // Hero-specific media (background + up to 2 polaroid images)
+  const [heroBgFile, setHeroBgFile] = useState<File | undefined>(undefined);
+  const [heroBgPreview, setHeroBgPreview] = useState<string | undefined>(undefined);
+  const [heroImgFiles, setHeroImgFiles] = useState<(File | undefined)[]>([undefined, undefined]);
+  const [heroImgPreviews, setHeroImgPreviews] = useState<string[]>([]);
+  // Editable template field values (tags, highlights, stats, timeline, cta, etc.) — use ref so callbacks
+  // never cause re-renders; read once in handleSave.
+  const templateDataRef = useRef<Record<string, unknown>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const heroBgInputRef = useRef<HTMLInputElement>(null);
+  const heroImgInputRef = useRef<HTMLInputElement>(null);
+  const heroImgSlotRef = useRef<number>(0);
 
   // Regenerate preview URLs whenever files change
   useEffect(() => {
@@ -39,14 +50,53 @@ export default function NewMomentPage() {
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, [files]);
 
+  // Revoke hero bg preview when file changes
+  useEffect(() => {
+    if (!heroBgFile) return;
+    const url = URL.createObjectURL(heroBgFile);
+    setHeroBgPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [heroBgFile]);
+
+  // Revoke hero img previews when files change
+  useEffect(() => {
+    const urls = heroImgFiles.map((f) => (f ? URL.createObjectURL(f) : undefined));
+    setHeroImgPreviews(urls.filter((u): u is string => Boolean(u)));
+    return () => urls.forEach((u) => { if (u) URL.revokeObjectURL(u); });
+  }, [heroImgFiles]);
+
   // Called by template image slots — opens system file picker
   const handleImageSlotClick = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 
+  const handleHeroBackgroundClick = useCallback(() => {
+    heroBgInputRef.current?.click();
+  }, []);
+
+  const handleHeroImagesClick = useCallback((index: number) => {
+    heroImgSlotRef.current = index;
+    heroImgInputRef.current?.click();
+  }, []);
+
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files ?? []);
     if (picked.length) setFiles((prev) => [...prev, ...picked]);
+    e.target.value = "";
+  };
+
+  const handleHeroBgInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) setHeroBgFile(f);
+    e.target.value = "";
+  };
+
+  const handleHeroImgInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) {
+      const idx = heroImgSlotRef.current;
+      setHeroImgFiles((prev) => { const next = [...prev]; next[idx] = f; return next; });
+    }
     e.target.value = "";
   };
 
@@ -71,15 +121,19 @@ export default function NewMomentPage() {
     setSaving(true);
     try {
       let uploadData: UploadResponse | undefined;
-      if (files.length > 0) {
+      const hasHeroFiles = heroBgFile !== undefined || heroImgFiles.some(Boolean);
+      if (files.length > 0 || hasHeroFiles) {
         const fd = new FormData();
         files.forEach((f) => fd.append("files", f));
+        if (heroBgFile) fd.append("heroBackground", heroBgFile);
+        heroImgFiles.forEach((f) => { if (f) fd.append("heroImages", f); });
         fd.append("type", "moment");
         fd.append("moment_id", momentId);
         const { data } = await api.post<UploadResponse>("/api/upload", fd);
         uploadData = data;
       }
 
+      const td: Record<string, unknown> = { ...templateDataRef.current, ...(uploadData?.fileUploads ?? {}) };
       await api.post("/api/moments", {
         title,
         caption: caption || undefined,
@@ -89,11 +143,13 @@ export default function NewMomentPage() {
           return content.trim().startsWith("<") ? content : `<p>${content}</p>`;
         })(),
         eventDate: eventDate || undefined,
+        momentId,
         imageUrl: uploadData?.images?.[0]?.fullUrl,
         images: uploadData?.images ?? undefined,
         spriteUrl: uploadData?.sprite?.sheetUrl,
         spriteManifest: uploadData?.sprite,
         templateId: activeTemplate ?? undefined,
+        templateData: Object.keys(td).length > 0 ? td : undefined,
       });
 
       router.push("/moments");
@@ -109,7 +165,7 @@ export default function NewMomentPage() {
 
   return (
     <div className="p-6 md:p-8">
-      {/* ── Hidden file input for template image slots ── */}
+      {/* —— Hidden file inputs —— */}
       <input
         ref={fileInputRef}
         type="file"
@@ -117,6 +173,20 @@ export default function NewMomentPage() {
         multiple
         className="sr-only"
         onChange={handleFileInputChange}
+      />
+      <input
+        ref={heroBgInputRef}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        onChange={handleHeroBgInputChange}
+      />
+      <input
+        ref={heroImgInputRef}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        onChange={handleHeroImgInputChange}
       />
 
       {/* Header */}
@@ -262,6 +332,17 @@ export default function NewMomentPage() {
                 onCaptionChange={setCaption}
                 onStoryChange={setContent}
                 onImageSlotClick={handleImageSlotClick}
+                {...(activeTemplate === "fun-energy" && {
+                  heroBackground: heroBgPreview,
+                  heroImages: heroImgPreviews,
+                  onHeroBackgroundClick: handleHeroBackgroundClick,
+                  onHeroImagesClick: handleHeroImagesClick,
+                  onTagsChange: (tags: string[]) => { templateDataRef.current = { ...templateDataRef.current, tags }; },
+                  onHighlightsChange: (highlights: unknown) => { templateDataRef.current = { ...templateDataRef.current, highlights }; },
+                  onStatsChange: (stats: unknown) => { templateDataRef.current = { ...templateDataRef.current, stats }; },
+                  onTimelineChange: (timeline: unknown) => { templateDataRef.current = { ...templateDataRef.current, timeline }; },
+                  onCTAChange: (cta: unknown) => { templateDataRef.current = { ...templateDataRef.current, cta }; },
+                })}
               />
             </div>
 
