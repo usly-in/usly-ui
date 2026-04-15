@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: github-pages
     env:
       AUTH_GOOGLE_ID: ${{ secrets.AUTH_GOOGLE_ID }}
       AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
@@ -25,15 +26,15 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: usly-ui
+        working-directory: .
         run: npm ci
 
       - name: Build
-        working-directory: usly-ui
+        working-directory: .
         run: npm run build
 
       - name: Export static HTML
-        working-directory: usly-ui
+        working-directory: .
         run: npm run export
 
       - name: Deploy to GitHub Pages
@@ -41,4 +42,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: usly-ui/out
+          publish_dir: out
