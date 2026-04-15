@@ -33,10 +33,6 @@ jobs:
         working-directory: .
         run: npm run build
 
-      - name: Export static HTML
-        working-directory: .
-        run: npm run export
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
