@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, Lock, Mail } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import api from "@/lib/api";
 
-const MarkdownEditor = dynamic(
-  () => import("@/components/MarkdownEditor").then((m) => m.MarkdownEditor),
+const TipTapEditor = dynamic(
+  () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
   { ssr: false }
 );
 
@@ -40,7 +41,7 @@ export default function NewLetterPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl">
+    <div className="p-6 md:p-8">
       <div className="flex items-center gap-3 mb-8">
         <Link href="/letters" className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#2a2a2a] text-[#888] hover:text-[#f5f5f5] hover:border-[#888]/40 transition-all">
           <ArrowLeft className="w-4 h-4" />
@@ -65,11 +66,12 @@ export default function NewLetterPage() {
             <p className="text-sm text-[#f5f5f5]">Time lock <span className="text-xs text-[#888]">(optional)</span></p>
           </div>
           <p className="text-xs text-[#888]">Set a date — this letter will be sealed until then.</p>
-          <input
-            type="date" value={openAt}
+          <DatePicker
+            value={openAt}
+            onChange={setOpenAt}
+            placeholder="Choose unlock date"
             min={new Date().toISOString().split("T")[0]}
-            onChange={(e) => setOpenAt(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-[#1c1c1c] border border-[#2a2a2a] text-[#f5f5f5] focus:outline-none focus:border-[#e4a0a0]/60 transition-colors text-sm [color-scheme:dark]"
+            placement="down"
           />
           {isTimeLocked && (
             <p className="text-xs text-[#e4a0a0]">
@@ -78,7 +80,7 @@ export default function NewLetterPage() {
           )}
         </div>
 
-        <MarkdownEditor value={content} onChange={setContent} height={400} />
+        <TipTapEditor value={content} onChange={setContent} placeholder="Dear future me…" height={400} />
 
         <div className="flex justify-end gap-2 pt-2">
           <Link href="/letters" className="px-4 py-2.5 rounded-xl text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">Cancel</Link>

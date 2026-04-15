@@ -6,15 +6,9 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Lock, Loader2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
 import { useSession } from "next-auth/react";
-
-const MDPreview = dynamic(
-  () => import("@/components/MarkdownEditor").then((m) => m.MDPreview),
-  { ssr: false }
-);
 
 export default function LetterDetailPage() {
   const params = useParams();
@@ -55,7 +49,7 @@ export default function LetterDetailPage() {
 
   if (letter.locked) {
     return (
-      <div className="p-6 md:p-8 max-w-2xl">
+      <div className="p-6 md:p-8">
         <Link href="/letters" className="inline-flex items-center gap-2 mb-8 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
           <ArrowLeft className="w-4 h-4" /> Letters
         </Link>
@@ -77,7 +71,7 @@ export default function LetterDetailPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl">
+    <div className="p-6 md:p-8">
       <div className="flex items-center justify-between mb-8">
         <Link href="/letters" className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#2a2a2a] text-[#888] hover:text-[#f5f5f5] hover:border-[#888]/40 transition-all">
           <ArrowLeft className="w-4 h-4" />
@@ -101,10 +95,11 @@ export default function LetterDetailPage() {
         </div>
 
         <div className="rounded-2xl border border-[#e4a0a0]/20 bg-[#141414] p-6">
-          <div data-color-mode="dark">
-            <MDPreview source={letter.content ?? ""} className="prose prose-sm" />
+            <div
+              className="prose prose-invert prose-sm max-w-none text-[#f5f5f5]"
+              dangerouslySetInnerHTML={{ __html: letter.content ?? "" }}
+            />
           </div>
-        </div>
       </motion.article>
     </div>
   );

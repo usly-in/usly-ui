@@ -5,10 +5,48 @@
   to   { stroke-dashoffset: 0; }
 }
 
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes scroll-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
 .usly-text {
   stroke-dasharray: 800;
   stroke-dashoffset: 800;
-  animation: draw 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+  animation:
+    draw 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards,
+    breathe 4s ease-in-out 1.8s infinite;
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    position: fixed;
+    top: 56;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #e4a0a0, #c47a7a);
+    transform-origin: left center;
+    transform: scaleX(0);
+    z-index: 9999;
+    animation: scroll-grow linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .usly-text {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .scroll-progress {
+    display: none;
+  }
 }
 
 :root {

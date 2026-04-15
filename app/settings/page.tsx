@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Save } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
 import api from "@/lib/api";
 import type { Tenant, UploadResponse } from "@/types";
 import { UploadZone } from "@/components/UploadZone";
@@ -53,7 +54,7 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl">
+    <div className="p-6 md:p-8">
       <h1 className="text-2xl font-light tracking-tight text-[#f5f5f5] mb-1">Settings</h1>
       <p className="text-sm text-[#888] mb-8">Manage your memory lane</p>
 
@@ -71,10 +72,11 @@ export default function SettingsPage() {
         {/* Start date */}
         <div>
           <label className="text-xs font-medium text-[#888] mb-2 block">Your anniversary / start date</label>
-          <input
-            type="date" value={form.startDate}
-            onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
-            className="w-full px-4 py-3.5 rounded-2xl bg-[#141414] border border-[#2a2a2a] text-[#f5f5f5] focus:outline-none focus:border-[#e4a0a0]/60 transition-colors text-sm [color-scheme:dark]"
+          <DatePicker
+            value={form.startDate}
+            onChange={(v) => setForm((p) => ({ ...p, startDate: v }))}
+            placeholder="Pick a start date"
+            placement="down"
           />
         </div>
 

@@ -30,7 +30,7 @@ export default function ChaptersPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl">
+    <div className="p-6 md:p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-light tracking-tight text-[#f5f5f5]">Chapters</h1>

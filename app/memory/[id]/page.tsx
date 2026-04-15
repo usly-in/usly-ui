@@ -6,14 +6,8 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Loader2, Lock } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
-
-const MDPreview = dynamic(
-  () => import("@/components/MarkdownEditor").then((m) => m.MDPreview),
-  { ssr: false }
-);
 
 export default function MemoryDetailPage() {
   const params = useParams();
@@ -27,7 +21,7 @@ export default function MemoryDetailPage() {
       .finally(() => setLoading(false));
   }, [params.id]);
 
-  const backHref = item?.type === "moment" ? "/moments" : item?.type === "chapter" ? "/chapters" : "/letters";
+  const backHref = item?.type === "chapter" ? "/chapters" : "/letters";
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center min-h-64">
@@ -36,12 +30,12 @@ export default function MemoryDetailPage() {
   );
 
   if (!item) return (
-    <div className="p-8 text-center text-[#888]">Memory not found.</div>
+    <div className="p-8 text-center text-[#888]">Not found.</div>
   );
 
   if (item.locked) {
     return (
-      <div className="p-6 md:p-8 max-w-2xl">
+      <div className="p-6 md:p-8">
         <Link href={backHref} className="inline-flex items-center gap-2 mb-8 text-sm text-[#888] hover:text-[#f5f5f5]">
           <ArrowLeft className="w-4 h-4" /> Back
         </Link>
@@ -57,7 +51,7 @@ export default function MemoryDetailPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl">
+    <div className="p-6 md:p-8">
       <Link href={backHref} className="inline-flex items-center gap-2 mb-8 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
@@ -66,6 +60,7 @@ export default function MemoryDetailPage() {
         {item.imageUrl && (
           <img src={item.imageUrl} alt={item.title} className="w-full rounded-2xl object-cover mb-6 max-h-96" />
         )}
+
         <h1 className="text-3xl font-light tracking-tight text-[#f5f5f5] mb-3">{item.title}</h1>
         {item.caption && (
           <p className="text-base text-[#888] italic mb-4">{item.caption}</p>
@@ -78,11 +73,13 @@ export default function MemoryDetailPage() {
         </div>
 
         {item.content && (
-          <div data-color-mode="dark">
-            <MDPreview source={item.content} className="prose prose-sm" />
-          </div>
+          <div
+            className="prose prose-invert prose-sm max-w-none text-[#f5f5f5]"
+            dangerouslySetInnerHTML={{ __html: item.content }}
+          />
         )}
       </motion.article>
     </div>
   );
 }
+

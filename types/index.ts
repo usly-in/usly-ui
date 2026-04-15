@@ -91,6 +91,8 @@ export interface ContentItem {
   eventDate?: string;
   openAt?: string;           // ISO date — letter is locked until this date
   locked?: boolean;          // computed by backend when openAt is in future
+  templateId?: string;       // built-in template used to create this moment
+  templateData?: Record<string, unknown>; // opaque template fields (from S3 meta.json on detail)
 }
 
 // Invitation
@@ -113,5 +115,7 @@ export interface ApiResponse<T> {
 
 export interface UploadResponse {
   images: ImageMeta[];
-  sprite: SpriteManifest;   // always present
+  sprite?: SpriteManifest;
+  /** {fieldName: s3Url} for every named non-gallery file uploaded */
+  fileUploads?: Record<string, string | string[]>;
 }

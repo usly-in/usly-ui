@@ -5,6 +5,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ArrowRight, Loader2, Star, Sparkles, UserCircle2, ArrowLeft } from "lucide-react";
+import { DatePicker } from "@/components/DatePicker";
 import { clsx } from "clsx";
 import api from "@/lib/api";
 import type { GroupType, UserGroup } from "@/types";
@@ -32,6 +33,13 @@ export default function SignupPage() {
   useEffect(() => {
     if (isNewGroup && session && step === "welcome") setStep("group");
   }, [session, isNewGroup, step]);
+
+  // If user already has groups and this isn't a new-group flow, they're already registered
+  useEffect(() => {
+    if (!isNewGroup && session?.user?.groups && session.user.groups.length > 0) {
+      router.replace("/dashboard");
+    }
+  }, [session, isNewGroup, router]);
 
   const handleGoogleSignIn = () => {
     signIn("google", { callbackUrl: "/signup?onboarding=1" });
@@ -119,7 +127,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6">
-      <button onClick={() => router.push("/dashboard")} className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
+      <button onClick={() => router.push(isNewGroup ? "/dashboard" : "/")} className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Back
       </button>
@@ -215,11 +223,11 @@ export default function SignupPage() {
             <p className="text-[#888] text-sm mb-6">
               {form.groupType === "lover" ? "Your anniversary or the day you met." : "A founding date, birthday, or anything special."} (Optional)
             </p>
-            <input
-              type="date"
+            <DatePicker
               value={form.startDate}
-              onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
-              className="w-full px-4 py-3.5 rounded-2xl bg-[#141414] border border-[#2a2a2a] text-[#f5f5f5] focus:outline-none transition-colors text-base mb-4 scheme-dark"
+              onChange={(v) => setForm((p) => ({ ...p, startDate: v }))}
+              placeholder="When did your story begin?"
+              className="mb-4"
             />
             <button onClick={handleCreateTenant} disabled={loading}
               className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl font-medium transition-all disabled:opacity-60 text-[#0b0b0b]"
