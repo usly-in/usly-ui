@@ -54,6 +54,8 @@ interface EnergyRushProps extends TemplateProps {
   readonly onHeroImagesClick?: (index: number) => void;
   /** Editable badge label (default: Fun & High-Energy) */
   readonly badgeLabel?: string;
+  readonly galleryCaptions?: string[];
+  readonly onGalleryCaptionsChange?: (captions: string[]) => void;
 }
 
 // ── Defaults ───────────────────────────────────────────────────────────────────
@@ -669,27 +671,34 @@ function HighlightsSection({
 
 // ── Media Gallery ──────────────────────────────────────────────────────────────
 
+const MAX_GALLERY_IMAGES = Math.max(1, Number(process.env.NEXT_PUBLIC_MAX_GALLERY_IMAGES) || 6);
+
 function GallerySection({
   images,
   editMode,
   onImageSlotClick,
+  galleryCaptions = [],
+  onGalleryCaptionsChange,
 }: Readonly<{
   images: readonly string[];
   editMode?: boolean;
   onImageSlotClick?: (index: number) => void;
+  galleryCaptions?: string[];
+  onGalleryCaptionsChange?: (captions: string[]) => void;
 }>) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [captions, setCaptions] = useState<string[]>(galleryCaptions);
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
 
-  let slots: (string | undefined)[];
-  if (images.length > 0) {
-    slots = [...images];
-  } else if (editMode === true) {
-    slots = new Array<string | undefined>(4).fill(undefined);
-  } else {
-    slots = [];
-  }
+  const updateCaption = (i: number, val: string) => {
+    const next = [...captions];
+    next[i] = val;
+    setCaptions(next);
+    onGalleryCaptionsChange?.(next);
+  };
+
+  const canAdd = editMode && images.length < MAX_GALLERY_IMAGES;
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -716,39 +725,74 @@ function GallerySection({
     return () => globalThis.removeEventListener("keydown", handler);
   }, [lightboxIndex, images.length]);
 
-  if (slots.length === 0) return null;
+  if (images.length === 0 && !editMode) return null;
 
   return (
     <div className="px-6 md:px-8 py-5" ref={ref}>
       <SectionHeader>✦ Gallery</SectionHeader>
       <motion.div
-        className="grid grid-cols-2 md:grid-cols-3 gap-3"
+        className="grid grid-cols-2 md:grid-cols-3 gap-4"
         variants={staggerContainer}
         initial="hidden"
         animate={inView ? "visible" : "hidden"}
       >
-        {slots.map((src, i) => (
+        {images.map((src, i) => (
           <motion.div
-            key={src ?? `empty-slot-${i}`}
+            key={src}
             variants={fadeUp}
-            whileHover={{ scale: 1.04, zIndex: 10 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="bg-white shadow-xl"
-            style={{
-              padding: "6px 6px 22px 6px",
-              transform: `rotate(${i % 2 === 0 ? "-1.5deg" : "1.5deg"})`,
-            }}
-            onClick={() => { if (src) setLightboxIndex(i); }}
+            className="flex flex-col gap-1.5"
           >
-            <PhotoSlot
-              src={src}
-              label={`Photo ${i + 1}`}
-              editMode={editMode}
-              onSlotClick={() => onImageSlotClick?.(i)}
-              className="w-full aspect-square bg-yellow-50"
-            />
+            <button
+              type="button"
+              className="bg-white shadow-xl cursor-pointer text-left w-full"
+              style={{
+                padding: "6px 6px 22px 6px",
+                transform: `rotate(${i % 2 === 0 ? "-1.5deg" : "1.5deg"})`,
+              }}
+              onClick={() => setLightboxIndex(i)}
+              aria-label={`View photo ${i + 1} in lightbox`}
+            >
+              <PhotoSlot
+                src={src}
+                label={`Photo ${i + 1}`}
+                editMode={editMode}
+                onSlotClick={() => onImageSlotClick?.(i)}
+                className="w-full aspect-square bg-yellow-50"
+              />
+            </button>
+            {/* Per-photo caption */}
+            {editMode ? (
+              <input
+                value={captions[i] ?? ""}
+                onChange={(e) => updateCaption(i, e.target.value)}
+                placeholder="Add a caption…"
+                className="bg-transparent border-b border-yellow-400/20 focus:border-yellow-400/50 text-[11px] text-white/50 placeholder-yellow-400/25 outline-none py-0.5 px-1 w-full transition-colors"
+              />
+            ) : (
+              captions[i] && (
+                <p className="text-[11px] text-white/40 italic text-center px-1 leading-snug">
+                  {captions[i]}
+                </p>
+              )
+            )}
           </motion.div>
         ))}
+
+        {/* Add photo button */}
+        {canAdd && (
+          <motion.button
+            variants={fadeUp}
+            type="button"
+            onClick={() => onImageSlotClick?.(images.length)}
+            className="flex flex-col items-center justify-center gap-2 bg-yellow-400/5 border-2 border-dashed border-yellow-400/20 hover:border-yellow-400/50 aspect-square text-yellow-400/50 hover:text-yellow-400 transition-colors"
+            aria-label="Add photo"
+          >
+            <Plus size={20} />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Add Photo</span>
+            <span className="text-[9px] text-yellow-400/30">{images.length} / {MAX_GALLERY_IMAGES}</span>
+          </motion.button>
+        )}
       </motion.div>
 
       {/* Lightbox */}
@@ -771,6 +815,12 @@ function GallerySection({
               exit={{ scale: 0.85, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
             />
+
+            {captions[lightboxIndex] && (
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white/70 text-xs px-4 py-2 rounded-full max-w-xs text-center pointer-events-none">
+                {captions[lightboxIndex]}
+              </div>
+            )}
 
             <button
               onClick={() => setLightboxIndex(null)}
@@ -1158,6 +1208,8 @@ export function EnergyRush({
   onHeroBackgroundClick,
   onHeroImagesClick,
   badgeLabel,
+  galleryCaptions,
+  onGalleryCaptionsChange,
 }: EnergyRushProps) {
   const cfg: Required<EnergyRushConfig> = { ...DEFAULT_CONFIG, ...config };
   const activeTags = tags ?? DEFAULT_TAGS;
@@ -1204,6 +1256,8 @@ export function EnergyRush({
           images={images}
           editMode={editMode}
           onImageSlotClick={onImageSlotClick}
+          galleryCaptions={galleryCaptions}
+          onGalleryCaptionsChange={onGalleryCaptionsChange}
         />
       )}
       {cfg.showStats && (
