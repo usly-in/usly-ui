@@ -16,6 +16,7 @@ jobs:
       AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
       API_URL: ${{ secrets.API_URL }}
       INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
       NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
     steps:
       - name: Checkout repository

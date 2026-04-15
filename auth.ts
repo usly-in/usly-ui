@@ -93,6 +93,10 @@ export const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
+  // Ensure Auth.js trusts the host header in this environment
+  trustHost: true,
+  // Explicit secret (uses AUTH_SECRET or NEXTAUTH_SECRET)
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   cookies: {
     sessionToken: {
       options: {

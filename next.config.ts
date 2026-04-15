@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  // Note: removed `output: "export"` because API routes (e.g. NextAuth)
+  // are incompatible with static `output: export`. Keeping default server
+  // output so dynamic API routes work during `next build`.
   images: {
     unoptimized: true,
     remotePatterns: [
