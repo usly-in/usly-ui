@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import type { Session } from "next-auth";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
@@ -57,7 +58,8 @@ function GroupSwitcher({ onClose }: { onClose?: () => void }) {
   async function switchGroup(group: UserGroup) {
     setOpen(false);
     await update({ tenantId: group.tenantId, userId: group.userId, role: group.role });
-    window.location.href = "/dashboard";
+    // Use router.push instead of direct window location mutation
+    router.push("/dashboard");
   }
 
   function handleNewGroup() {
@@ -161,21 +163,20 @@ function GroupSwitcher({ onClose }: { onClose?: () => void }) {
   );
 }
 
-export function Sidebar() {
-  const pathname = usePathname();
-  const { data: session } = useSession();
-  const [open, setOpen] = useState(false);
+interface SidebarContentProps {
+  isMobile?: boolean;
+  items: typeof navItems;
+  pathname: string | null;
+  session?: Session | null;
+  onClose?: () => void;
+}
 
-  const items = navItems.filter(
-    (item) => !item.adminOnly || session?.user?.role === "admin"
-  );
-
-  // Use CSS var for active accent so it responds to data-theme
-  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
+function SidebarContent({ isMobile = false, items, pathname, session, onClose }: SidebarContentProps) {
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-4 pb-0">
-        <Link href="/dashboard" className="flex items-center gap-2 px-1 mb-1" onClick={() => setOpen(false)}>
+        <Link href="/dashboard" className="flex items-center gap-2 px-1 mb-1" onClick={() => onClose?.()}>
           <div className="w-7 h-7 rounded-lg bg-[var(--accent-muted,rgba(228,160,160,0.1))] flex items-center justify-center">
             <Heart className="w-3.5 h-3.5 text-[var(--accent,#e4a0a0)] fill-current" />
           </div>
@@ -184,7 +185,7 @@ export function Sidebar() {
       </div>
 
       {/* Group Switcher */}
-      <GroupSwitcher onClose={() => setOpen(false)} />
+      <GroupSwitcher onClose={onClose} />
 
       <div className="mx-3 h-px bg-[#2a2a2a]" />
 
@@ -192,12 +193,12 @@ export function Sidebar() {
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {items.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+          const active = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
           return (
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setOpen(false)}
+              onClick={() => onClose?.()}
               className={clsx(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all",
                 active
@@ -238,12 +239,22 @@ export function Sidebar() {
       </div>
     </div>
   );
+}
+
+export function Sidebar() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const [open, setOpen] = useState(false);
+
+  const items = navItems.filter(
+    (item) => !item.adminOnly || session?.user?.role === "admin"
+  );
 
   return (
     <>
       {/* Desktop */}
       <aside className="hidden md:flex flex-col w-60 min-h-screen bg-[#0d0d0d] border-r border-[#2a2a2a] flex-shrink-0">
-        <SidebarContent />
+        <SidebarContent items={items} pathname={pathname} session={session} onClose={() => setOpen(false)} />
       </aside>
 
       {/* Mobile toggle */}
@@ -271,7 +282,7 @@ export function Sidebar() {
               <button onClick={() => setOpen(false)} className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg text-[#888] hover:text-[#f5f5f5]">
                 <X className="w-4 h-4" />
               </button>
-              <SidebarContent isMobile />
+              <SidebarContent isMobile items={items} pathname={pathname} session={session} onClose={() => setOpen(false)} />
             </motion.aside>
           </>
         )}
@@ -279,4 +290,3 @@ export function Sidebar() {
     </>
   );
 }
-

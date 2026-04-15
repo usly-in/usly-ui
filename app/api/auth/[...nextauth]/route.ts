@@ -1,6 +1,6 @@
-// NOTE: This route is not functional on static hosts (GitHub Pages).
-// Auth requires a server-side runtime. For full auth, deploy to Vercel or a Node.js host.
-export const dynamic = "force-static";
+// NOTE: This route requires a server-side runtime. Ensure it's dynamic so
+// NextAuth handlers execute on the server during requests.
+export const dynamic = "force-dynamic";
 
 import { handlers } from "@/auth";
 
