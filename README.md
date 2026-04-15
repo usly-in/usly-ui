@@ -63,7 +63,6 @@ cp .env.local.example .env.local
 | `AUTH_SECRET` | Random 32-char secret for NextAuth JWT signing (`openssl rand -hex 32`) |
 | `AUTH_GOOGLE_ID` | Google OAuth Client ID |
 | `AUTH_GOOGLE_SECRET` | Google OAuth Client Secret |
-| `NEXTAUTH_URL` | Base URL of this app (default: `http://localhost:3000`) |
 | `NEXT_PUBLIC_API_URL` | Backend API base URL (browser-side, default: `http://localhost:8000`) |
 | `API_URL` | Backend API base URL (server-side, for auth callbacks) |
 | `INTERNAL_API_SECRET` | Shared secret for UI→API internal auth endpoints |
@@ -133,8 +132,6 @@ npm run build   # verify build locally first
 ```
 
 Then push to your Vercel-linked repository. Set the same environment variables from `.env.local.example` in the Vercel project settings.
-
-Update `NEXTAUTH_URL` to your production domain and add the production callback URL to your Google OAuth app:
 
 ```
 https://your-domain.vercel.app/api/auth/callback/google
