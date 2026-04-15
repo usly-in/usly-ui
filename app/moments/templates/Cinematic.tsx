@@ -19,7 +19,7 @@ export function Cinematic({
   onCaptionChange,
   onStoryChange,
   onImageSlotClick,
-}: Readonly<TemplateProps>) {
+}: TemplateProps) {
   const dateLabel = eventDate
     ? new Date(eventDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase()
     : null;

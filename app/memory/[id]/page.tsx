@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import Link from "next/link";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
-import MomentTemplateRenderer from "@/app/components/MomentTemplateRenderer";
 
 export default function MemoryDetailPage() {
   const params = useParams();
@@ -22,9 +21,7 @@ export default function MemoryDetailPage() {
       .finally(() => setLoading(false));
   }, [params.id]);
 
-  let backHref = "/letters";
-  if (item?.type === "moment") backHref = "/moments";
-  else if (item?.type === "chapter") backHref = "/chapters";
+  const backHref = item?.type === "chapter" ? "/chapters" : "/letters";
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center min-h-64">
@@ -33,7 +30,7 @@ export default function MemoryDetailPage() {
   );
 
   if (!item) return (
-    <div className="p-8 text-center text-[#888]">Memory not found.</div>
+    <div className="p-8 text-center text-[#888]">Not found.</div>
   );
 
   if (item.locked) {
@@ -53,38 +50,6 @@ export default function MemoryDetailPage() {
     );
   }
 
-  const isMoment = item.type === "moment";
-  let allImages: { fullUrl: string }[];
-  if (item.images && item.images.length > 0) {
-    allImages = item.images;
-  } else if (item.imageUrl) {
-    allImages = [{ fullUrl: item.imageUrl }];
-  } else {
-    allImages = [];
-  }
-
-  // ── Template moment: render inside the chosen WordPress-style layout ──
-  if (isMoment && item.templateId) {
-    const imageUrls = allImages.map((i) => i.fullUrl);
-    return (
-      <div className="p-6 md:p-8">
-        <Link href={backHref} className="inline-flex items-center gap-2 mb-8 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back
-        </Link>
-        <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <MomentTemplateRenderer
-            templateId={item.templateId}
-            title={item.title}
-            caption={item.caption}
-            story={item.content}
-            images={imageUrls}
-            eventDate={item.eventDate}
-          />
-        </motion.article>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 md:p-8">
       <Link href={backHref} className="inline-flex items-center gap-2 mb-8 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
@@ -92,22 +57,7 @@ export default function MemoryDetailPage() {
       </Link>
 
       <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-        {/* Moment: photo grid */}
-        {isMoment && allImages.length > 0 && (
-          <div className={`mb-6 gap-2 ${allImages.length === 1 ? "block" : "grid grid-cols-2"}`}>
-            {allImages.map((img) => (
-              <img
-                key={img.fullUrl}
-                src={img.fullUrl}
-                alt={item.title}
-                className={`w-full object-cover rounded-2xl ${allImages.length === 1 ? "max-h-112" : "h-52"}`}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Non-moment: single image */}
-        {!isMoment && item.imageUrl && (
+        {item.imageUrl && (
           <img src={item.imageUrl} alt={item.title} className="w-full rounded-2xl object-cover mb-6 max-h-96" />
         )}
 
@@ -132,3 +82,4 @@ export default function MemoryDetailPage() {
     </div>
   );
 }
+
