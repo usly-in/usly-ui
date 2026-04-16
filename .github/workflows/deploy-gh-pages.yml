@@ -16,12 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: github-pages
     env:
-      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-      AUTH_GOOGLE_ID: ${{ secrets.AUTH_GOOGLE_ID }}
-      AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
       API_URL: ${{ secrets.API_URL }}
       INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
-      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
       NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
       NEXT_PUBLIC_BASE_PATH: ""
     steps:
