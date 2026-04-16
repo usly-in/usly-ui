@@ -1,0 +1,1 @@
+self.__SSG_MANIFEST=new Set(["\u002Fchapters\u002F[id]","\u002Fletters\u002F[id]","\u002Fmemory\u002F[id]","\u002Fmoments\u002F[id]"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
