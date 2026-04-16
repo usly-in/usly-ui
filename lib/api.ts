@@ -1,34 +1,34 @@
 import axios from "axios";
-import { getSession, signOut } from "next-auth/react";
+import { getAuthUser, clearAuth } from "@/lib/auth-client";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-// Client-side axios instance — attaches session JWT as bearer token
+// Client-side axios instance — attaches auth headers from localStorage JWT
 const api = axios.create({
   baseURL: API_URL,
 });
 
-api.interceptors.request.use(async (config) => {
-  // In browser context, get the session and pass the JWT
+api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const session = await getSession();
-    if (session) {
-      // We pass tenantId and role as headers for the backend to validate
-      config.headers["x-tenant-id"] = session.user.tenantId;
-      config.headers["x-user-id"] = session.user.id;
-      config.headers["x-user-role"] = session.user.role;
-      config.headers["x-user-email"] = session.user.email;
+    const user = getAuthUser();
+    if (user) {
+      config.headers["x-tenant-id"] = user.tenantId;
+      config.headers["x-user-id"] = user.id;
+      config.headers["x-user-role"] = user.role;
+      config.headers["x-user-email"] = user.email ?? "";
     }
   }
   return config;
 });
 
-// Auto sign-out on 401 — session is stale or missing tenantId, force re-login
+// Auto-logout on 401 — token expired or missing
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      await signOut({ callbackUrl: "/login" });
+      clearAuth();
+      const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+      window.location.href = `${base}/login`;
     }
     return Promise.reject(error);
   }

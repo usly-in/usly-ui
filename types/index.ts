@@ -1,6 +1,5 @@
-// Extend next-auth types to include custom fields
-import "next-auth";
-import "next-auth/jwt";
+// Auth user — defined by our own JWT (issued by FastAPI)
+// (NextAuth module augmentation removed — auth is now FastAPI-based)
 
 export type GroupType = "lover" | "family" | "friends" | "custom";
 
@@ -10,30 +9,6 @@ export interface UserGroup {
   role: "admin" | "member";
   groupType: GroupType;
   name: string; // tenant name
-}
-
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      tenantId: string;
-      role: "admin" | "member";
-      groups: UserGroup[];
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-    };
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    userId?: string;
-    tenantId?: string;
-    role?: "admin" | "member";
-    picture?: string | null;
-    groups?: UserGroup[];
-  }
 }
 
 // Tenant

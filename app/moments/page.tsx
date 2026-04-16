@@ -5,12 +5,12 @@ import { motion } from "framer-motion";
 import { Plus, ImageIcon } from "lucide-react";
 import { ContentCard } from "@/components/ContentCard";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth-client";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
 
 export default function MomentsPage() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [moments, setMoments] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -74,7 +74,7 @@ export default function MomentsPage() {
             <motion.div key={item.contentId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
               <ContentCard
                 item={item}
-                onDelete={item.createdBy === session?.user?.id ? () => handleDelete(item.contentId) : undefined}
+                onDelete={item.createdBy === user?.id ? () => handleDelete(item.contentId) : undefined}
               />
             </motion.div>
           ))}

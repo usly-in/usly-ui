@@ -8,13 +8,14 @@ import { format } from "date-fns";
 import Link from "next/link";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
-import { useSession } from "next-auth/react";
+
+import { useAuth } from "@/lib/auth-client";
 
 interface Props { id: string }
 
 export default function ClientPage({ id }: Props) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [chapter, setChapter] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -54,7 +55,7 @@ export default function ClientPage({ id }: Props) {
         <Link href="/chapters" className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#2a2a2a] text-[#888] hover:text-[#f5f5f5] hover:border-[#888]/40 transition-all">
           <ArrowLeft className="w-4 h-4" />
         </Link>
-        {session?.user?.role === "admin" && (
+        {user?.role === "admin" && (
           <button onClick={handleDelete} disabled={deleting}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs text-[#888] hover:text-red-400 hover:bg-red-400/10 transition-all border border-[#2a2a2a]">
             {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}

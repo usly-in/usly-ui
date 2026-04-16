@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
@@ -16,7 +16,7 @@ function GoogleIcon() {
   );
 }
 
-export default function LoginPage() {
+function LoginContent() {
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
   const error = params.get("error");
@@ -29,7 +29,6 @@ export default function LoginPage() {
         transition={{ duration: 0.6 }}
         className="w-full max-w-sm"
       >
-        {/* Logo */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#e4a0a0]/10 mb-4">
             <Heart className="w-6 h-6 text-[#e4a0a0] fill-current" />
@@ -38,7 +37,6 @@ export default function LoginPage() {
           <p className="text-sm text-[#888] mt-1.5">Sign in to your memory lane</p>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mb-6 px-4 py-3 rounded-xl bg-red-900/20 border border-red-800/40 text-sm text-red-400 text-center">
             {error === "AccessDenied"
@@ -47,23 +45,32 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Google Sign In */}
         <button
-          onClick={() => signIn("google", { callbackUrl })}
+          onClick={() => {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+            window.location.href = `${apiUrl}/auth/google?callback_url=${encodeURIComponent(callbackUrl)}`;
+          }}
           className="w-full flex items-center justify-center gap-3 px-5 py-3.5 border border-[#2a2a2a] rounded-2xl bg-[#141414] hover:bg-[#1c1c1c] hover:border-[#888]/40 transition-all text-sm text-[#f5f5f5] font-medium"
         >
           <GoogleIcon />
           Continue with Google
         </button>
 
-        {/* Divider */}
         <div className="mt-8 pt-6 border-t border-[#2a2a2a] text-center">
           <p className="text-sm text-[#888]">
-            Don&apos;t have a memory lane?{" "}
+            {"Don't have a memory lane? "}
             <a href="/signup" className="text-[#e4a0a0] hover:underline">Start one</a>
           </p>
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0b0b0b]" />}>
+      <LoginContent />
+    </Suspense>
   );
 }

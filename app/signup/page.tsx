@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { Suspense, useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ArrowRight, Loader2, Star, Sparkles, UserCircle2, ArrowLeft } from "lucide-react";
@@ -20,7 +20,15 @@ const GROUP_OPTIONS: { type: GroupType; label: string; desc: string; Icon: React
 ];
 
 export default function SignupPage() {
-  const { data: session, update } = useSession();
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0b0b0b]" />}>
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
+  const { user, refresh } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNewGroup = searchParams.get("new") === "1";
@@ -31,18 +39,19 @@ export default function SignupPage() {
 
   // If coming back as new-group and already signed in, skip to group selection
   useEffect(() => {
-    if (isNewGroup && session && step === "welcome") setStep("group");
-  }, [session, isNewGroup, step]);
+    if (isNewGroup && user && step === "welcome") setStep("group");
+  }, [user, isNewGroup, step]);
 
   // If user already has groups and this isn't a new-group flow, they're already registered
   useEffect(() => {
-    if (!isNewGroup && session?.user?.groups && session.user.groups.length > 0) {
+    if (!isNewGroup && user?.groups && user.groups.length > 0) {
       router.replace("/dashboard");
     }
-  }, [session, isNewGroup, router]);
+  }, [user, isNewGroup, router]);
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/signup?onboarding=1" });
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    window.location.href = `${apiUrl}/auth/google?callback_url=/signup?onboarding=1`;
   };
 
   const handleCreateTenant = async () => {
@@ -54,19 +63,8 @@ export default function SignupPage() {
         startDate: form.startDate || new Date().toISOString().split("T")[0],
         groupType: form.groupType,
       });
-      const newGroup: UserGroup = {
-        tenantId: res.data.tenantId,
-        userId: session?.user?.id ?? "",
-        role: "admin",
-        groupType: form.groupType,
-        name: form.name,
-      };
-      const existingGroups: UserGroup[] = session?.user?.groups ?? [];
-      await update({
-        tenantId: res.data.tenantId,
-        role: "admin",
-        groups: [...existingGroups, newGroup],
-      });
+      // newGroup is created in the DB by the API; refresh() fetches the updated JWT
+      await refresh();
       setStep("done");
       setTimeout(() => { globalThis.location.href = "/dashboard"; }, 1500);
     } catch {
@@ -96,7 +94,7 @@ export default function SignupPage() {
   const nameSectionPlaceholder = NAME_PLACEHOLDERS[form.groupType] ?? NAME_PLACEHOLDERS.custom;
 
   // If not signed in yet (and not a new-group flow), show the initial sign-in step
-  if (!session) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6">
         <button onClick={() => router.push("/")} className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
@@ -138,7 +136,7 @@ export default function SignupPage() {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#e4a0a0]/10 mb-6">
               <Heart className="w-6 h-6 text-[#e4a0a0] fill-current" />
             </div>
-            <h1 className="text-2xl font-light tracking-tight mb-2">Hi, {session.user.name?.split(" ")[0]} 👋</h1>
+            <h1 className="text-2xl font-light tracking-tight mb-2">Hi, {user?.name?.split(" ")[0]} 👋</h1>
             <p className="text-[#888] text-sm mb-8">Let&apos;s set up your first memory lane.</p>
             <button onClick={() => setStep("group")}
               className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-[#e4a0a0] text-[#0b0b0b] rounded-2xl font-medium hover:bg-[#c47a7a] transition-all">
@@ -150,7 +148,7 @@ export default function SignupPage() {
         {step === "group" && (
           <motion.div key="group" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full max-w-sm">
             {isNewGroup && (
-              <p className="text-xs text-[#888] capitalize mb-1">Hi, {session.user.name?.split(" ")[0]} 👋</p>
+              <p className="text-xs text-[#888] capitalize mb-1">Hi, {user?.name?.split(" ")[0]} 👋</p>
             )}
             <h2 className="text-xl font-light tracking-tight mb-1">What type of group is this?</h2>
             <p className="text-[#888] text-sm mb-6">Each group gets its own theme and memories.</p>

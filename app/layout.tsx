@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
-import { auth } from "@/auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,18 +33,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
   return (
     <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-[#0b0b0b] text-[#f5f5f5]">
-        <SessionProvider session={session}>
-          {children}
-        </SessionProvider>
+        {/* Restore deep-link path after GitHub Pages 404 redirect */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(l){if(l.search[1]=='/'){var d=l.search.slice(1).split('&').map(function(s){return s.replace(/~and~/g,'&')}).join('?');window.history.replaceState(null,null,l.pathname.slice(0,-1)+d+l.hash)}}(window.location))` }} />
+        {children}
       </body>
     </html>
   );
