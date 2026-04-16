@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth-client";
 import {
   motion,
   useMotionValue,
@@ -55,7 +55,7 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { user: session } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [loading, setLoading] = useState(true);
@@ -113,16 +113,16 @@ export default function DashboardPage() {
         className="relative mb-10 flex items-center gap-5"
       >
         <div className="shrink-0">
-          {session?.user?.image ? (
+          {session?.image ? (
             <img
-              src={session.user.image}
-              alt={session.user.name ?? ""}
+              src={session.image}
+              alt={session.name ?? ""}
               referrerPolicy="no-referrer"
               className="w-12 h-12 rounded-full object-cover ring-2 ring-[#2a2a2a]"
             />
           ) : (
             <div className="w-12 h-12 rounded-full bg-[#e4a0a0]/20 flex items-center justify-center text-lg text-[#e4a0a0] font-medium">
-              {session?.user?.name?.[0] ?? "?"}
+              {session?.name?.[0] ?? "?"}
             </div>
           )}
         </div>
@@ -131,7 +131,7 @@ export default function DashboardPage() {
             {tenant?.name ?? "Your memory lane"}
           </h1>
           <p className="text-sm text-[#888] mt-0.5">
-            {session?.user?.name ? `Welcome back, ${session.user.name.split(" ")[0]}` : "Welcome back"}
+            {session?.name ? `Welcome back, ${session.name.split(" ")[0]}` : "Welcome back"}
           </p>
         </div>
       </motion.div>

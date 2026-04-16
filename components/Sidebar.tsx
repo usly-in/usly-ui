@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import type { Session } from "next-auth";
+import { useAuth, type AuthUser } from "@/lib/auth-client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
@@ -47,18 +46,17 @@ const GROUP_META: Record<GroupType, { label: string; Icon: React.FC<{ className?
 };
 
 function GroupSwitcher({ onClose }: { onClose?: () => void }) {
-  const { data: session, update } = useSession();
+  const { user, switchGroup } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  const groups: UserGroup[] = session?.user?.groups ?? [];
-  const activeTenantId = session?.user?.tenantId;
+  const groups: UserGroup[] = user?.groups ?? [];
+  const activeTenantId = user?.tenantId;
   const activeGroup = groups.find((g) => g.tenantId === activeTenantId) ?? groups[0];
 
-  async function switchGroup(group: UserGroup) {
+  async function switchGroupHandler(group: UserGroup) {
     setOpen(false);
-    await update({ tenantId: group.tenantId, userId: group.userId, role: group.role });
-    // Use router.push instead of direct window location mutation
+    switchGroup(group);
     router.push("/dashboard");
   }
 
@@ -119,7 +117,7 @@ function GroupSwitcher({ onClose }: { onClose?: () => void }) {
               return (
                 <button
                   key={g.tenantId}
-                  onClick={() => !isActive && switchGroup(g)}
+                  onClick={() => !isActive && switchGroupHandler(g)}
                   className={clsx(
                     "w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all",
                     isActive ? "bg-[#1c1c1c] cursor-default" : "hover:bg-[#1c1c1c] cursor-pointer"
@@ -167,11 +165,12 @@ interface SidebarContentProps {
   isMobile?: boolean;
   items: typeof navItems;
   pathname: string | null;
-  session?: Session | null;
+  user?: AuthUser | null;
+  onLogout?: () => void;
   onClose?: () => void;
 }
 
-function SidebarContent({ isMobile = false, items, pathname, session, onClose }: SidebarContentProps) {
+function SidebarContent({ isMobile = false, items, pathname, user, onLogout, onClose }: SidebarContentProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
@@ -217,20 +216,20 @@ function SidebarContent({ isMobile = false, items, pathname, session, onClose }:
       {/* User */}
       <div className="p-3 border-t border-[#2a2a2a]">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          {session?.user?.image ? (
-            <img src={session.user.image} alt="" referrerPolicy="no-referrer" className="w-7 h-7 rounded-full object-cover" />
+          {user?.image ? (
+            <img src={user.image} alt="" referrerPolicy="no-referrer" className="w-7 h-7 rounded-full object-cover" />
           ) : (
             <div className="w-7 h-7 rounded-full bg-[var(--accent-muted,rgba(228,160,160,0.2))] flex items-center justify-center text-xs text-[var(--accent,#e4a0a0)] font-medium">
-              {session?.user?.name?.[0] ?? "?"}
+              {user?.name?.[0] ?? "?"}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-[#f5f5f5] font-medium truncate">{session?.user?.name}</p>
-            <p className="text-xs text-[#888] capitalize">{session?.user?.role}</p>
+            <p className="text-xs text-[#f5f5f5] font-medium truncate">{user?.name}</p>
+            <p className="text-xs text-[#888] capitalize">{user?.role}</p>
           </div>
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: "/" })}
+          onClick={() => onLogout?.()}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#888] hover:text-[#f5f5f5] hover:bg-[#1c1c1c] transition-all"
         >
           <LogOut className="w-4 h-4" />
@@ -243,18 +242,18 @@ function SidebarContent({ isMobile = false, items, pathname, session, onClose }:
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
   const items = navItems.filter(
-    (item) => !item.adminOnly || session?.user?.role === "admin"
+    (item) => !item.adminOnly || user?.role === "admin"
   );
 
   return (
     <>
       {/* Desktop */}
       <aside className="hidden md:flex flex-col w-60 min-h-screen bg-[#0d0d0d] border-r border-[#2a2a2a] flex-shrink-0">
-        <SidebarContent items={items} pathname={pathname} session={session} onClose={() => setOpen(false)} />
+        <SidebarContent items={items} pathname={pathname} user={user} onLogout={logout} onClose={() => setOpen(false)} />
       </aside>
 
       {/* Mobile toggle */}
@@ -282,7 +281,7 @@ export function Sidebar() {
               <button onClick={() => setOpen(false)} className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg text-[#888] hover:text-[#f5f5f5]">
                 <X className="w-4 h-4" />
               </button>
-              <SidebarContent isMobile items={items} pathname={pathname} session={session} onClose={() => setOpen(false)} />
+              <SidebarContent isMobile items={items} pathname={pathname} user={user} onLogout={logout} onClose={() => setOpen(false)} />
             </motion.aside>
           </>
         )}

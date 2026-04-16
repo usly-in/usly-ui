@@ -1,15 +1,13 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/auth-client";
 import { Sidebar } from "@/components/Sidebar";
 import type { GroupType } from "@/types";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
-  const activeGroup = session?.user?.groups?.find(
-    (g) => g.tenantId === session.user.tenantId
-  );
+  const activeGroup = user?.groups?.find((g) => g.tenantId === user.tenantId);
   const theme: GroupType = activeGroup?.groupType ?? "lover";
 
   return (

@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Note: removed `output: "export"` because API routes (e.g. NextAuth)
-  // are incompatible with static `output: export`. Keeping default server
-  // output so dynamic API routes work during `next build`.
+  // Static export for GitHub Pages deployment
+  output: "export",
+  trailingSlash: true,
+  // basePath is set via env var so local dev works without it
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",
   images: {
     unoptimized: true,
     remotePatterns: [

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Loader2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
@@ -11,11 +10,13 @@ import api from "@/lib/api";
 import type { ContentItem } from "@/types";
 import MomentTemplateRenderer from "../MomentTemplateRenderer";
 
+import { useAuth } from "@/lib/auth-client";
+
 interface Props { id: string }
 
 export default function ClientPage({ id }: Props) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [item, setItem] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -52,7 +53,7 @@ export default function ClientPage({ id }: Props) {
     return <div className="p-8 text-center text-[#888]">Moment not found.</div>;
   }
 
-  const isCreator = session?.user?.id === item.createdBy;
+  const isCreator = user?.id === item?.createdBy;
 
   // Build flat image URL list for template renderer and generic layout
   let allImages: { fullUrl: string }[];
