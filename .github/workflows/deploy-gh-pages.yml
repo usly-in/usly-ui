@@ -23,7 +23,7 @@ jobs:
       INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
       NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
       NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
-      NEXT_PUBLIC_BASE_PATH: /usly-ui
+      NEXT_PUBLIC_BASE_PATH: ""
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
