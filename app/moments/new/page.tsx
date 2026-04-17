@@ -11,6 +11,7 @@ import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { UploadResponse } from "@/types";
 import { TEMPLATE_LIST, TEMPLATE_MAP } from "../templates";
+import MessageModal from "@/components/MessageModal";
 
 const TipTapEditor = dynamic(
   () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
@@ -27,6 +28,7 @@ export default function NewMomentPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [uploadKey, setUploadKey] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   // Blob preview URLs for template image slots (generated from File objects)
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -155,7 +157,7 @@ export default function NewMomentPage() {
       router.push("/moments");
     } catch {
       setUploadKey((k) => k + 1);
-      alert("Failed to save moment.");
+      setPopupMessage("Failed to save moment.");
     } finally {
       setSaving(false);
     }
@@ -198,6 +200,7 @@ export default function NewMomentPage() {
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <div>
+        <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
           <h1 className="text-xl font-light tracking-tight text-[#f5f5f5]">
             Capture a moment
           </h1>

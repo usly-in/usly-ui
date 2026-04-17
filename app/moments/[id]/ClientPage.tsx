@@ -9,6 +9,8 @@ import Link from "next/link";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
 import MomentTemplateRenderer from "../MomentTemplateRenderer";
+import MessageModal from "@/components/MessageModal";
+import ConfirmModal from "@/components/ConfirmModal";
 
 import { useAuth } from "@/lib/auth-client";
 
@@ -20,6 +22,9 @@ export default function ClientPage({ id }: Props) {
   const [item, setItem] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     api
@@ -29,15 +34,22 @@ export default function ClientPage({ id }: Props) {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!confirm("Delete this moment? This cannot be undone.")) return;
+  const handleDelete = () => {
+    setConfirmOpen(true);
+  };
+
+  const doDeleteConfirmed = async () => {
+    setConfirmLoading(true);
     setDeleting(true);
     try {
       await api.delete(`/api/moments/${item!.contentId}`);
       router.push("/moments");
     } catch {
-      alert("Failed to delete moment.");
+      setPopupMessage("Failed to delete moment.");
       setDeleting(false);
+    } finally {
+      setConfirmLoading(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -78,7 +90,7 @@ export default function ClientPage({ id }: Props) {
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="inline-flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl transition-all disabled:opacity-40"
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all disabled:opacity-40"
         >
           {deleting ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -96,6 +108,8 @@ export default function ClientPage({ id }: Props) {
     return (
       <div className="p-6 md:p-8">
         {backButton}
+        <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
+        <ConfirmModal open={confirmOpen} title="Delete moment?" description="This cannot be undone." confirmLabel="Delete" danger onConfirm={doDeleteConfirmed} onCancel={() => setConfirmOpen(false)} loading={confirmLoading} />
         <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
           <MomentTemplateRenderer
             templateId={item.templateId}
@@ -115,6 +129,8 @@ export default function ClientPage({ id }: Props) {
   return (
     <div className="p-6 md:p-8">
       {backButton}
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
+      <ConfirmModal open={confirmOpen} title="Delete moment?" description="This cannot be undone." confirmLabel="Delete" danger onConfirm={doDeleteConfirmed} onCancel={() => setConfirmOpen(false)} loading={confirmLoading} />
       <motion.article initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
         {allImages.length > 0 && (
           <div className={`mb-6 gap-2 ${allImages.length === 1 ? "block" : "grid grid-cols-2"}`}>

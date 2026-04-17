@@ -131,7 +131,7 @@ export function ContentCard({ item, onClick, onDelete }: ContentCardProps) {
             e.stopPropagation();
             onDelete();
           }}
-          className="absolute top-2 right-2 p-1.5 rounded-lg bg-[#141414]/80 text-[#555] hover:text-red-400 hover:bg-red-400/10 opacity-0 group-hover/card:opacity-100 transition-all z-10"
+          className="absolute top-2 right-2 p-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 opacity-0 group-hover/card:opacity-100 transition-all z-10"
           aria-label="Delete"
         >
           <Trash2 className="w-3.5 h-3.5" />

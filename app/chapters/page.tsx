@@ -7,10 +7,16 @@ import Link from "next/link";
 import { format } from "date-fns";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
+import ConfirmModal from "@/components/ConfirmModal";
+import MessageModal from "@/components/MessageModal";
 
 export default function ChaptersPage() {
   const [chapters, setChapters] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState<string | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     api.get("/api/chapters")
@@ -19,13 +25,23 @@ export default function ChaptersPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this chapter?")) return;
+  const handleDelete = (id: string) => {
+    setConfirmTarget(id);
+    setConfirmOpen(true);
+  };
+
+  const doDeleteConfirmed = async () => {
+    if (!confirmTarget) return;
+    setConfirmLoading(true);
     try {
-      await api.delete(`/api/chapters/${id}`);
-      setChapters((prev) => prev.filter((c) => c.contentId !== id));
+      await api.delete(`/api/chapters/${confirmTarget}`);
+      setChapters((prev) => prev.filter((c) => c.contentId !== confirmTarget));
+      setConfirmOpen(false);
+      setConfirmTarget(null);
     } catch {
-      alert("Failed to delete chapter.");
+      setPopupMessage("Failed to delete chapter.");
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
@@ -82,7 +98,7 @@ export default function ChaptersPage() {
               </Link>
               <button
                 onClick={() => handleDelete(chapter.contentId)}
-                className="absolute top-3 right-3 p-1.5 rounded-lg text-[#555] hover:text-red-400 hover:bg-red-400/10 opacity-0 group-hover/row:opacity-100 transition-all z-10"
+                className="absolute top-3 right-3 p-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 opacity-0 group-hover/row:opacity-100 transition-all z-10"
                 aria-label="Delete chapter"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -92,6 +108,17 @@ export default function ChaptersPage() {
           ))}
         </div>
       )}
+      <ConfirmModal
+        open={confirmOpen}
+        title="Delete chapter?"
+        description="This cannot be undone."
+        confirmLabel="Delete"
+        danger
+        onConfirm={doDeleteConfirmed}
+        onCancel={() => setConfirmOpen(false)}
+        loading={confirmLoading}
+      />
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
     </div>
   );
 }

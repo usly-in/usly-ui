@@ -8,11 +8,17 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-client";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
+import ConfirmModal from "@/components/ConfirmModal";
+import MessageModal from "@/components/MessageModal";
 
 export default function MomentsPage() {
   const { user } = useAuth();
   const [moments, setMoments] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState<string | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   const fetchMoments = async () => {
     try {
@@ -27,13 +33,23 @@ export default function MomentsPage() {
 
   useEffect(() => { fetchMoments(); }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this moment?")) return;
+  const handleDelete = (id: string) => {
+    setConfirmTarget(id);
+    setConfirmOpen(true);
+  };
+
+  const doDeleteConfirmed = async () => {
+    if (!confirmTarget) return;
+    setConfirmLoading(true);
     try {
-      await api.delete(`/api/moments/${id}`);
-      setMoments((prev) => prev.filter((m) => m.contentId !== id));
+      await api.delete(`/api/moments/${confirmTarget}`);
+      setMoments((prev) => prev.filter((m) => m.contentId !== confirmTarget));
+      setConfirmOpen(false);
+      setConfirmTarget(null);
     } catch {
-      alert("Failed to delete moment.");
+      setPopupMessage("Failed to delete moment.");
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
@@ -80,6 +96,8 @@ export default function MomentsPage() {
           ))}
         </div>
       )}
+      <ConfirmModal open={confirmOpen} title="Delete moment?" description="This cannot be undone." confirmLabel="Delete" danger onConfirm={doDeleteConfirmed} onCancel={() => setConfirmOpen(false)} loading={confirmLoading} />
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { DatePicker } from "@/components/DatePicker";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import api from "@/lib/api";
+import MessageModal from "@/components/MessageModal";
 
 const TipTapEditor = dynamic(
   () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
@@ -20,6 +21,7 @@ export default function NewChapterPage() {
   const [content, setContent] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [saving, setSaving] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!title.trim()) return;
@@ -32,7 +34,7 @@ export default function NewChapterPage() {
       });
       router.push("/chapters");
     } catch {
-      alert("Failed to save chapter.");
+      setPopupMessage("Failed to save chapter.");
     } finally {
       setSaving(false);
     }
@@ -73,6 +75,7 @@ export default function NewChapterPage() {
           </button>
         </div>
       </motion.div>
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
     </div>
   );
 }

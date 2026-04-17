@@ -7,10 +7,16 @@ import Link from "next/link";
 import { format } from "date-fns";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
+import ConfirmModal from "@/components/ConfirmModal";
+import MessageModal from "@/components/MessageModal";
 
 export default function LettersPage() {
   const [letters, setLetters] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState<string | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     api.get("/api/letters")
@@ -19,13 +25,23 @@ export default function LettersPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this letter?")) return;
+  const handleDelete = (id: string) => {
+    setConfirmTarget(id);
+    setConfirmOpen(true);
+  };
+
+  const doDeleteConfirmed = async () => {
+    if (!confirmTarget) return;
+    setConfirmLoading(true);
     try {
-      await api.delete(`/api/letters/${id}`);
-      setLetters((prev) => prev.filter((l) => l.contentId !== id));
+      await api.delete(`/api/letters/${confirmTarget}`);
+      setLetters((prev) => prev.filter((l) => l.contentId !== confirmTarget));
+      setConfirmOpen(false);
+      setConfirmTarget(null);
     } catch {
-      alert("Failed to delete letter.");
+      setPopupMessage("Failed to delete letter.");
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
@@ -91,7 +107,7 @@ export default function LettersPage() {
               </Link>
               <button
                 onClick={() => handleDelete(letter.contentId)}
-                className="absolute top-3 right-3 p-1.5 rounded-lg text-[#555] hover:text-red-400 hover:bg-red-400/10 opacity-0 group-hover/row:opacity-100 transition-all z-10"
+                className="absolute top-3 right-3 p-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 opacity-0 group-hover/row:opacity-100 transition-all z-10"
                 aria-label="Delete letter"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -101,6 +117,8 @@ export default function LettersPage() {
           ))}
         </div>
       )}
+      <ConfirmModal open={confirmOpen} title="Delete letter?" description="This cannot be undone." confirmLabel="Delete" danger onConfirm={doDeleteConfirmed} onCancel={() => setConfirmOpen(false)} loading={confirmLoading} />
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
     </div>
   );
 }
