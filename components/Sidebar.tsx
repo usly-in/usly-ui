@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, type AuthUser } from "@/lib/auth-client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
 import {
@@ -49,6 +49,11 @@ function GroupSwitcher({ onClose }: { onClose?: () => void }) {
   const { user, switchGroup } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const groups: UserGroup[] = user?.groups ?? [];
   const activeTenantId = user?.tenantId;
@@ -67,6 +72,21 @@ function GroupSwitcher({ onClose }: { onClose?: () => void }) {
   }
 
   // No active group (first-time user or session predates multi-group) — show create prompt
+  if (!mounted) {
+    // Render a deterministic placeholder to avoid SSR/CSR markup mismatch during hydration
+    return (
+      <div className="px-3 pt-3 pb-2">
+        <button className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#141414] border border-[#2a2a2a]">
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-[#2a2a2a]" />
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-xs font-medium text-[#f5f5f5] truncate">...</p>
+            <p className="text-[10px] text-[#888]">loading</p>
+          </div>
+        </button>
+      </div>
+    );
+  }
+
   if (!activeGroup) {
     return (
       <div className="px-3 pt-3 pb-2">
@@ -90,7 +110,7 @@ function GroupSwitcher({ onClose }: { onClose?: () => void }) {
       {/* Active group trigger */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#141414] border border-[#2a2a2a] hover:border-[var(--accent-ring)] transition-all"
+        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#141414] border border-[#2a2a2a] hover:border-[#e4a0a0]/40 transition-all"
       >
         <div className={clsx("w-6 h-6 rounded-lg flex items-center justify-center shrink-0", bg)}>
           <Icon className={clsx("w-3.5 h-3.5", color)} />
@@ -168,16 +188,17 @@ interface SidebarContentProps {
   user?: AuthUser | null;
   onLogout?: () => void;
   onClose?: () => void;
+  mounted?: boolean;
 }
 
-function SidebarContent({ isMobile = false, items, pathname, user, onLogout, onClose }: SidebarContentProps) {
+function SidebarContent({ isMobile = false, items, pathname, user, onLogout, onClose, mounted = true }: SidebarContentProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-4 pb-0">
         <Link href="/dashboard" className="flex items-center gap-2 px-1 mb-1" onClick={() => onClose?.()}>
-          <div className="w-7 h-7 rounded-lg bg-[var(--accent-muted,rgba(228,160,160,0.1))] flex items-center justify-center">
-            <Heart className="w-3.5 h-3.5 text-[var(--accent,#e4a0a0)] fill-current" />
+          <div className="w-7 h-7 rounded-lg bg-[rgba(228,160,160,0.1)] flex items-center justify-center">
+            <Heart className="w-3.5 h-3.5 text-[#e4a0a0] fill-current" />
           </div>
           <span className="font-semibold text-sm tracking-tight text-[#f5f5f5]">usly</span>
         </Link>
@@ -189,23 +210,24 @@ function SidebarContent({ isMobile = false, items, pathname, user, onLogout, onC
       <div className="mx-3 h-px bg-[#2a2a2a]" />
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+      <nav suppressHydrationWarning className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {items.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+          const active = mounted && (pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href)));
           return (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => onClose?.()}
-              className={clsx(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all",
-                active
-                  ? "bg-[var(--accent-muted,rgba(228,160,160,0.1))] text-[var(--accent,#e4a0a0)] font-medium"
-                  : "text-[#888] hover:text-[#f5f5f5] hover:bg-[#1c1c1c]"
-              )}
+              suppressHydrationWarning
+                className={clsx(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all",
+                  active
+                    ? "bg-[rgba(228,160,160,0.1)] text-[#e4a0a0] font-medium"
+                    : "text-[#888] hover:text-[#f5f5f5] hover:bg-[#1c1c1c]"
+                )}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
+              <Icon className="w-4 h-4 shrink-0" />
               {item.label}
               {active && <ChevronRight className="w-3 h-3 ml-auto" />}
             </Link>
@@ -219,7 +241,7 @@ function SidebarContent({ isMobile = false, items, pathname, user, onLogout, onC
           {user?.image ? (
             <img src={user.image} alt="" referrerPolicy="no-referrer" className="w-7 h-7 rounded-full object-cover" />
           ) : (
-            <div className="w-7 h-7 rounded-full bg-[var(--accent-muted,rgba(228,160,160,0.2))] flex items-center justify-center text-xs text-[var(--accent,#e4a0a0)] font-medium">
+            <div className="w-7 h-7 rounded-full bg-[rgba(228,160,160,0.2)] flex items-center justify-center text-xs text-[#e4a0a0] font-medium">
               {user?.name?.[0] ?? "?"}
             </div>
           )}
@@ -244,6 +266,11 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const items = navItems.filter(
     (item) => !item.adminOnly || user?.role === "admin"
@@ -252,8 +279,23 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden md:flex flex-col w-60 min-h-screen bg-[#0d0d0d] border-r border-[#2a2a2a] flex-shrink-0">
-        <SidebarContent items={items} pathname={pathname} user={user} onLogout={logout} onClose={() => setOpen(false)} />
+      <aside className="hidden md:flex flex-col w-60 min-h-screen bg-[#0d0d0d] border-r border-[#2a2a2a] shrink-0">
+        {mounted ? (
+          <SidebarContent mounted={mounted} items={items} pathname={pathname} user={user} onLogout={logout} onClose={() => setOpen(false)} />
+        ) : (
+          <div className="p-4 pb-0">
+            <div className="flex items-center gap-2 px-1 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-[#2a2a2a]" />
+              <div className="w-24 h-4 bg-[#2a2a2a] rounded" />
+            </div>
+            <div className="px-3 pt-3 pb-2 space-y-3">
+              <div className="w-full h-10 rounded-xl bg-[#141414] border border-[#2a2a2a]" />
+              <div className="w-full h-10 rounded-xl bg-[#141414] border border-[#2a2a2a]" />
+              <div className="w-full h-10 rounded-xl bg-[#141414] border border-[#2a2a2a]" />
+              <div className="w-full h-10 rounded-xl bg-[#141414] border border-[#2a2a2a]" />
+            </div>
+          </div>
+        )}
       </aside>
 
       {/* Mobile toggle */}
@@ -281,7 +323,7 @@ export function Sidebar() {
               <button onClick={() => setOpen(false)} className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg text-[#888] hover:text-[#f5f5f5]">
                 <X className="w-4 h-4" />
               </button>
-              <SidebarContent isMobile items={items} pathname={pathname} user={user} onLogout={logout} onClose={() => setOpen(false)} />
+              <SidebarContent isMobile mounted={mounted} items={items} pathname={pathname} user={user} onLogout={logout} onClose={() => setOpen(false)} />
             </motion.aside>
           </>
         )}

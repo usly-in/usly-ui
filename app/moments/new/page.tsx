@@ -263,7 +263,7 @@ export default function NewMomentPage() {
             const selected = activeTemplate === entry.id;
             const Comp = TEMPLATE_MAP[entry.id];
             return (
-              <motion.button
+              <motion.div
                 key={entry.id}
                 initial={{ opacity: 0, y: 14, scale: 0.94 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -271,6 +271,9 @@ export default function NewMomentPage() {
                 whileHover={{ y: -3, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => selectTemplate(entry.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectTemplate(entry.id); } }}
                 className={[
                   "relative flex-none w-32 h-48 rounded-2xl border overflow-hidden cursor-pointer transition-colors duration-200",
                   selected ? "border-[#e4a0a0]/60" : "border-[#2a2a2a] hover:border-[#3a3a3a]",
@@ -306,7 +309,7 @@ export default function NewMomentPage() {
                     className="absolute inset-0 rounded-2xl border-2 border-[#e4a0a0]/60 pointer-events-none"
                   />
                 )}
-              </motion.button>
+              </motion.div>
             );
           })}
         </div>
@@ -345,6 +348,18 @@ export default function NewMomentPage() {
                   onStatsChange: (stats: unknown) => { templateDataRef.current = { ...templateDataRef.current, stats }; },
                   onTimelineChange: (timeline: unknown) => { templateDataRef.current = { ...templateDataRef.current, timeline }; },
                   onCTAChange: (cta: unknown) => { templateDataRef.current = { ...templateDataRef.current, cta }; },
+                })}
+                {...(activeTemplate === "birthday-bash" && {
+                  heroBackground: heroBgPreview,
+                  heroImages: heroImgPreviews,
+                  onHeroBackgroundClick: handleHeroBackgroundClick,
+                  onHeroImagesClick: handleHeroImagesClick,
+                  onTagsChange: (tags: string[]) => { templateDataRef.current = { ...templateDataRef.current, tags }; },
+                  onHighlightsChange: (highlights: unknown) => { templateDataRef.current = { ...templateDataRef.current, highlights }; },
+                  onStatsChange: (stats: unknown) => { templateDataRef.current = { ...templateDataRef.current, stats }; },
+                  onTimelineChange: (timeline: unknown) => { templateDataRef.current = { ...templateDataRef.current, timeline }; },
+                  onCTAChange: (cta: unknown) => { templateDataRef.current = { ...templateDataRef.current, cta }; },
+                  onGalleryCaptionsChange: (captions: unknown) => { templateDataRef.current = { ...templateDataRef.current, galleryCaptions: captions }; },
                 })}
               />
             </div>
