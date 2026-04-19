@@ -7,6 +7,7 @@ import { DatePicker } from "@/components/DatePicker";
 import api from "@/lib/api";
 import type { Tenant, UploadResponse } from "@/types";
 import { UploadZone } from "@/components/UploadZone";
+import MessageModal from "@/components/MessageModal";
 
 export default function SettingsPage() {
   const [tenant, setTenant] = useState<Tenant | null>(null);
@@ -14,6 +15,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: "", startDate: "", coverPhotoUrl: "", coverPhotoFile: null as File | null });
   const [uploadKey, setUploadKey] = useState(0);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     api.get("/api/tenants/me")
@@ -39,9 +41,10 @@ export default function SettingsPage() {
       }
       await api.patch("/api/tenants/me", { name: form.name, startDate: form.startDate, coverPhotoUrl });
       setForm((p) => ({ ...p, coverPhotoUrl, coverPhotoFile: null }));
-      alert("Settings saved!");
+      setPopupMessage("Settings saved!");
+      setTimeout(() => setPopupMessage(null), 1500);
     } catch {
-      alert("Failed to save settings.");
+      setPopupMessage("Failed to save settings.");
     } finally {
       setSaving(false);
     }
@@ -103,6 +106,7 @@ export default function SettingsPage() {
           </button>
         </div>
       </motion.div>
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title={popupMessage === "Settings saved!" ? "Saved" : "Error"} message={popupMessage ?? ""} />
     </div>
   );
 }

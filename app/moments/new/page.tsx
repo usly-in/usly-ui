@@ -11,6 +11,7 @@ import dynamic from "next/dynamic";
 import api from "@/lib/api";
 import type { UploadResponse } from "@/types";
 import { TEMPLATE_LIST, TEMPLATE_MAP } from "../templates";
+import MessageModal from "@/components/MessageModal";
 
 const TipTapEditor = dynamic(
   () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
@@ -27,6 +28,7 @@ export default function NewMomentPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [uploadKey, setUploadKey] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   // Blob preview URLs for template image slots (generated from File objects)
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -155,7 +157,7 @@ export default function NewMomentPage() {
       router.push("/moments");
     } catch {
       setUploadKey((k) => k + 1);
-      alert("Failed to save moment.");
+      setPopupMessage("Failed to save moment.");
     } finally {
       setSaving(false);
     }
@@ -198,6 +200,7 @@ export default function NewMomentPage() {
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <div>
+        <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
           <h1 className="text-xl font-light tracking-tight text-[#f5f5f5]">
             Capture a moment
           </h1>
@@ -260,7 +263,7 @@ export default function NewMomentPage() {
             const selected = activeTemplate === entry.id;
             const Comp = TEMPLATE_MAP[entry.id];
             return (
-              <motion.button
+              <motion.div
                 key={entry.id}
                 initial={{ opacity: 0, y: 14, scale: 0.94 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -268,6 +271,9 @@ export default function NewMomentPage() {
                 whileHover={{ y: -3, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => selectTemplate(entry.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectTemplate(entry.id); } }}
                 className={[
                   "relative flex-none w-32 h-48 rounded-2xl border overflow-hidden cursor-pointer transition-colors duration-200",
                   selected ? "border-[#e4a0a0]/60" : "border-[#2a2a2a] hover:border-[#3a3a3a]",
@@ -303,7 +309,7 @@ export default function NewMomentPage() {
                     className="absolute inset-0 rounded-2xl border-2 border-[#e4a0a0]/60 pointer-events-none"
                   />
                 )}
-              </motion.button>
+              </motion.div>
             );
           })}
         </div>
@@ -342,6 +348,18 @@ export default function NewMomentPage() {
                   onStatsChange: (stats: unknown) => { templateDataRef.current = { ...templateDataRef.current, stats }; },
                   onTimelineChange: (timeline: unknown) => { templateDataRef.current = { ...templateDataRef.current, timeline }; },
                   onCTAChange: (cta: unknown) => { templateDataRef.current = { ...templateDataRef.current, cta }; },
+                })}
+                {...(activeTemplate === "birthday-bash" && {
+                  heroBackground: heroBgPreview,
+                  heroImages: heroImgPreviews,
+                  onHeroBackgroundClick: handleHeroBackgroundClick,
+                  onHeroImagesClick: handleHeroImagesClick,
+                  onTagsChange: (tags: string[]) => { templateDataRef.current = { ...templateDataRef.current, tags }; },
+                  onHighlightsChange: (highlights: unknown) => { templateDataRef.current = { ...templateDataRef.current, highlights }; },
+                  onStatsChange: (stats: unknown) => { templateDataRef.current = { ...templateDataRef.current, stats }; },
+                  onTimelineChange: (timeline: unknown) => { templateDataRef.current = { ...templateDataRef.current, timeline }; },
+                  onCTAChange: (cta: unknown) => { templateDataRef.current = { ...templateDataRef.current, cta }; },
+                  onGalleryCaptionsChange: (captions: unknown) => { templateDataRef.current = { ...templateDataRef.current, galleryCaptions: captions }; },
                 })}
               />
             </div>

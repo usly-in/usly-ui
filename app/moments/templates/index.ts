@@ -5,6 +5,7 @@ import { RooftopGlow } from "./RooftopGlow";
 import { Cinematic } from "./Cinematic";
 import { NightMode } from "./NightMode";
 import { Vinyl } from "./Vinyl";
+import { BirthdayBash } from "./BirthdayBash";
 
 export type { TemplateProps, TemplateEntry };
 
@@ -15,6 +16,7 @@ export const TEMPLATE_MAP: Record<string, ComponentType<TemplateProps>> = {
   "sunset-talk": Cinematic,
   "latenight-walk": NightMode,
   "music-sharing": Vinyl,
+  "birthday-bash": BirthdayBash,
 };
 
 /** Ordered list used by pickers and renderers */
@@ -77,6 +79,17 @@ export const TEMPLATE_LIST: TemplateEntry[] = [
       caption: "Exchanging playlists, sitting, feeling the songs",
       story:
         "We sat together and swapped songs — the ones that remind us of each other. Sometimes music says what words can't.",
+    },
+  },
+  {
+    id: "birthday-bash",
+    name: "Birthday Bash",
+    tag: "Birthday Party",
+    emoji: "🎂",
+    placeholders: {
+      title: "Birthday Bash",
+      caption: "Cake, friends, and confetti",
+      story: "A night of celebration — cake, candles, and the people who make life brighter.",
     },
   },
 ];

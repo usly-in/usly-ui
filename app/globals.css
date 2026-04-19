@@ -177,3 +177,12 @@ body {
   user-select: none;
   pointer-events: none;
 }
+
+/* Make interactive buttons show pointer cursor consistently */
+button {
+  cursor: pointer;
+}
+button:disabled,
+button[disabled] {
+  cursor: not-allowed;
+}

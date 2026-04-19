@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Upload, X, ImagePlus } from "lucide-react";
+import MessageModal from "@/components/MessageModal";
 
 interface UploadZoneProps {
   /** Called whenever the file list changes. */
@@ -14,13 +15,14 @@ export function UploadZone({ onFilesSelected, maxFiles = 6, className }: UploadZ
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const addFiles = useCallback(
     (incoming: FileList | File[]) => {
       const arr = Array.from(incoming);
       const valid = arr.filter((f) => {
-        if (!f.type.startsWith("image/")) { alert(`"${f.name}" is not an image.`); return false; }
-        if (f.size > 10 * 1024 * 1024)    { alert(`"${f.name}" exceeds 10 MB.`);   return false; }
+        if (!f.type.startsWith("image/")) { setErrorMsg(`"${f.name}" is not an image.`); return false; }
+        if (f.size > 10 * 1024 * 1024)    { setErrorMsg(`"${f.name}" exceeds 10 MB.`);   return false; }
         return true;
       });
       if (!valid.length) return;
@@ -60,6 +62,7 @@ export function UploadZone({ onFilesSelected, maxFiles = 6, className }: UploadZ
 
   return (
     <div className={className}>
+      <MessageModal open={!!errorMsg} onClose={() => setErrorMsg(null)} title="Upload error" message={errorMsg ?? ""} />
       {/* Thumbnail grid */}
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
@@ -68,7 +71,8 @@ export function UploadZone({ onFilesSelected, maxFiles = 6, className }: UploadZ
               <img src={src} alt="" className="w-full h-full object-cover" />
               <button
                 onClick={() => removeFile(i)}
-                className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-full bg-black/70 text-white hover:bg-black/90 transition-colors"
+                className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors"
+                aria-label="Remove photo"
               >
                 <X className="w-3 h-3" />
               </button>

@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Static export for GitHub Pages deployment
-  output: "export",
+  // Server rendering enabled (disabled static export)
+  // Previously used static `output: "export"` which prevents dynamic
+  // `/moments/[id]` routes from being rendered at request time.
   trailingSlash: true,
   // basePath is set via env var so local dev works without it
   basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? "",

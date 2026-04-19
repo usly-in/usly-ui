@@ -8,6 +8,8 @@ import { format } from "date-fns";
 import Link from "next/link";
 import api from "@/lib/api";
 import type { ContentItem } from "@/types";
+import ConfirmModal from "@/components/ConfirmModal";
+import MessageModal from "@/components/MessageModal";
 
 import { useAuth } from "@/lib/auth-client";
 
@@ -19,6 +21,9 @@ export default function ClientPage({ id }: Props) {
   const [chapter, setChapter] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     api.get(`/api/chapters/${id}`)
@@ -27,15 +32,22 @@ export default function ClientPage({ id }: Props) {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this chapter?")) return;
+  const handleDelete = () => {
+    setConfirmOpen(true);
+  };
+
+  const doDeleteConfirmed = async () => {
+    setConfirmLoading(true);
     setDeleting(true);
     try {
       await api.delete(`/api/chapters/${id}`);
       router.push("/chapters");
     } catch {
-      alert("Failed to delete chapter.");
+      setPopupMessage("Failed to delete chapter.");
       setDeleting(false);
+    } finally {
+      setConfirmLoading(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -57,7 +69,7 @@ export default function ClientPage({ id }: Props) {
         </Link>
         {user?.role === "admin" && (
           <button onClick={handleDelete} disabled={deleting}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs text-[#888] hover:text-red-400 hover:bg-red-400/10 transition-all border border-[#2a2a2a]">
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs bg-red-600 text-white hover:bg-red-700 transition-all disabled:opacity-40">
             {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
             Delete
           </button>
@@ -83,6 +95,8 @@ export default function ClientPage({ id }: Props) {
           dangerouslySetInnerHTML={{ __html: chapter.content ?? "" }}
         />
       </motion.article>
+      <ConfirmModal open={confirmOpen} title="Delete chapter?" description="This cannot be undone." confirmLabel="Delete" danger onConfirm={doDeleteConfirmed} onCancel={() => setConfirmOpen(false)} loading={confirmLoading} />
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
     </div>
   );
 }

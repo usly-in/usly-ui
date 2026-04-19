@@ -7,12 +7,18 @@ import { format } from "date-fns";
 import api from "@/lib/api";
 import type { Invitation } from "@/types";
 import { InviteModal } from "@/components/InviteModal";
+import ConfirmModal from "@/components/ConfirmModal";
+import MessageModal from "@/components/MessageModal";
 
 export default function InvitationsPage() {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [revoking, setRevoking] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState<string | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   const fetchInvitations = async () => {
     try {
@@ -27,16 +33,25 @@ export default function InvitationsPage() {
 
   useEffect(() => { fetchInvitations(); }, []);
 
-  const handleRevoke = async (inviteId: string) => {
-    if (!confirm("Revoke this invitation?")) return;
-    setRevoking(inviteId);
+  const handleRevoke = (inviteId: string) => {
+    setConfirmTarget(inviteId);
+    setConfirmOpen(true);
+  };
+
+  const doRevokeConfirmed = async () => {
+    if (!confirmTarget) return;
+    setConfirmLoading(true);
+    setRevoking(confirmTarget);
     try {
-      await api.delete(`/api/invitations/${inviteId}`);
+      await api.delete(`/api/invitations/${confirmTarget}`);
       fetchInvitations();
+      setConfirmOpen(false);
+      setConfirmTarget(null);
     } catch {
-      alert("Failed to revoke invitation.");
+      setPopupMessage("Failed to revoke invitation.");
     } finally {
       setRevoking(null);
+      setConfirmLoading(false);
     }
   };
 
@@ -102,6 +117,8 @@ export default function InvitationsPage() {
           })}
         </div>
       )}
+      <ConfirmModal open={confirmOpen} title="Revoke invitation?" description="This cannot be undone." confirmLabel="Revoke" onConfirm={doRevokeConfirmed} onCancel={() => setConfirmOpen(false)} loading={confirmLoading} />
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
     </div>
   );
 }

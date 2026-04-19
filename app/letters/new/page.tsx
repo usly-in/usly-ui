@@ -8,6 +8,7 @@ import { DatePicker } from "@/components/DatePicker";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import api from "@/lib/api";
+import MessageModal from "@/components/MessageModal";
 
 const TipTapEditor = dynamic(
   () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
@@ -20,6 +21,7 @@ export default function NewLetterPage() {
   const [content, setContent] = useState("");
   const [openAt, setOpenAt] = useState("");
   const [saving, setSaving] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   const isTimeLocked = !!openAt && new Date(openAt) > new Date();
 
@@ -34,7 +36,7 @@ export default function NewLetterPage() {
       });
       router.push("/letters");
     } catch {
-      alert("Failed to save letter.");
+      setPopupMessage("Failed to save letter.");
     } finally {
       setSaving(false);
     }
@@ -92,6 +94,7 @@ export default function NewLetterPage() {
           </button>
         </div>
       </motion.div>
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { DatePicker } from "@/components/DatePicker";
 import { clsx } from "clsx";
 import api from "@/lib/api";
 import type { GroupType, UserGroup } from "@/types";
+import MessageModal from "@/components/MessageModal";
 
 type Step = "welcome" | "group" | "names" | "date" | "done";
 
@@ -36,6 +37,7 @@ function SignupContent() {
   const [step, setStep] = useState<Step>(isNewGroup ? "group" : "welcome");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", startDate: "", groupType: "lover" as GroupType });
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
 
   // If coming back as new-group and already signed in, skip to group selection
   useEffect(() => {
@@ -68,7 +70,7 @@ function SignupContent() {
       setStep("done");
       setTimeout(() => { globalThis.location.href = "/dashboard"; }, 1500);
     } catch {
-      alert("Failed to create your memory lane. Please try again.");
+      setPopupMessage("Failed to create your memory lane. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -125,6 +127,7 @@ function SignupContent() {
 
   return (
     <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6">
+      <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
       <button onClick={() => router.push(isNewGroup ? "/dashboard" : "/")} className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Back
