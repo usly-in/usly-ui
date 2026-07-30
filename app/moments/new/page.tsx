@@ -361,6 +361,12 @@ export default function NewMomentPage() {
                   onCTAChange: (cta: unknown) => { templateDataRef.current = { ...templateDataRef.current, cta }; },
                   onGalleryCaptionsChange: (captions: unknown) => { templateDataRef.current = { ...templateDataRef.current, galleryCaptions: captions }; },
                 })}
+                {...(activeTemplate === "cake-parallax" && {
+                  heroBackground: heroBgPreview,
+                  cakeLayers: heroImgPreviews,
+                  onHeroBackgroundClick: handleHeroBackgroundClick,
+                  onCakeLayerClick: (index: number) => { templateDataRef.current = { ...templateDataRef.current, cakeLayers: (templateDataRef.current.cakeLayers ?? heroImgPreviews).slice ? (templateDataRef.current.cakeLayers as string[]).map(String) : heroImgPreviews }; },
+                })}
               />
             </div>
 
