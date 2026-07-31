@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
+import Image from "next/image";
 import { useAuth } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +11,7 @@ import { clsx } from "clsx";
 import api from "@/lib/api";
 import type { GroupType, UserGroup } from "@/types";
 import MessageModal from "@/components/MessageModal";
+import SlidingEaseVerticalBars from "@/components/ui/sliding-ease";
 
 type Step = "welcome" | "group" | "names" | "date" | "done";
 
@@ -98,15 +100,14 @@ function SignupContent() {
   // If not signed in yet (and not a new-group flow), show the initial sign-in step
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6">
-        <button onClick={() => router.push("/")} className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
+      <div className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6 overflow-hidden">
+        <SlidingEaseVerticalBars backgroundColor="#0b0b0b" lineColor="#2a2a2a" barColor="#e4a0a0" animationSpeed={0.004} />
+        <button onClick={() => router.push("/")} className="absolute z-10 top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#e4a0a0]/10 mb-6">
-            <Heart className="w-6 h-6 text-[#e4a0a0] fill-current" />
-          </div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full max-w-sm text-center">
+          <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" priority />
           <h1 className="text-2xl font-light tracking-tight mb-2">Create your memory lane</h1>
           <p className="text-[#888] text-sm mb-8 max-w-xs mx-auto">A private space to capture moments, write chapters, and leave letters for each other.</p>
           <button onClick={handleGoogleSignIn}
@@ -126,19 +127,18 @@ function SignupContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6">
+    <div className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6 overflow-hidden">
+      <SlidingEaseVerticalBars backgroundColor="#0b0b0b" lineColor="#2a2a2a" barColor="#e4a0a0" animationSpeed={0.004} />
       <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
-      <button onClick={() => router.push(isNewGroup ? "/dashboard" : "/")} className="absolute top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
+      <button onClick={() => router.push(isNewGroup ? "/dashboard" : "/")} className="absolute z-10 top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Back
       </button>
       <AnimatePresence mode="wait">
 
         {step === "welcome" && (
-          <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full max-w-sm text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#e4a0a0]/10 mb-6">
-              <Heart className="w-6 h-6 text-[#e4a0a0] fill-current" />
-            </div>
+          <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="relative z-10 w-full max-w-sm text-center">
+            <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" priority />
             <h1 className="text-2xl font-light tracking-tight mb-2">Hi, {user?.name?.split(" ")[0]} 👋</h1>
             <p className="text-[#888] text-sm mb-8">Let&apos;s set up your first memory lane.</p>
             <button onClick={() => setStep("group")}
@@ -149,7 +149,7 @@ function SignupContent() {
         )}
 
         {step === "group" && (
-          <motion.div key="group" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full max-w-sm">
+          <motion.div key="group" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="relative z-10 w-full max-w-sm">
             {isNewGroup && (
               <p className="text-xs text-[#888] capitalize mb-1">Hi, {user?.name?.split(" ")[0]} 👋</p>
             )}
@@ -194,7 +194,7 @@ function SignupContent() {
         )}
 
         {step === "names" && (
-          <motion.div key="names" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full max-w-sm">
+          <motion.div key="names" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="relative z-10 w-full max-w-sm">
             <h2 className="text-xl font-light tracking-tight mb-1">What&apos;s this memory lane called?</h2>
             <p className="text-[#888] text-sm mb-6">
               {nameSectionHint}
@@ -217,7 +217,7 @@ function SignupContent() {
         )}
 
         {step === "date" && (
-          <motion.div key="date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full max-w-sm">
+          <motion.div key="date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="relative z-10 w-full max-w-sm">
             <h2 className="text-xl font-light tracking-tight mb-1">
               {form.groupType === "lover" ? "When did your story begin?" : "Any special start date?"}
             </h2>
@@ -240,7 +240,7 @@ function SignupContent() {
         )}
 
         {step === "done" && (
-          <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
+          <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative z-10 text-center">
             <div className="text-5xl mb-4">✨</div>
             <h2 className="text-2xl font-light tracking-tight mb-2">Your memory lane is ready</h2>
             <p className="text-[#888] text-sm">Taking you there now…</p>

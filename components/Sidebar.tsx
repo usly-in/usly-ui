@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, type AuthUser } from "@/lib/auth-client";
 import { useState, useSyncExternalStore } from "react";
@@ -198,11 +199,8 @@ function SidebarContent({ isMobile = false, items, pathname, user, onLogout, onC
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-4 pb-0">
-        <Link href="/dashboard" className="flex items-center gap-2 px-1 mb-1" onClick={() => onClose?.()}>
-          <div className="w-7 h-7 rounded-lg bg-[rgba(228,160,160,0.1)] flex items-center justify-center">
-            <Heart className="w-3.5 h-3.5 text-[#e4a0a0] fill-current" />
-          </div>
-          <span className="font-semibold text-sm tracking-tight text-[#f5f5f5]">usly</span>
+        <Link href="/dashboard" className="flex items-center px-1 mb-1" onClick={() => onClose?.()}>
+          <Image src="/usly-lockup-nav.svg" alt="usly" width={70} height={20} priority />
         </Link>
       </div>
 
