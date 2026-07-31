@@ -101,7 +101,7 @@ export function useAuth() {
 
   const logout = useCallback(() => {
     clearAuth();
-    router.push("/login");
+    router.push("/");
   }, [router]);
 
   const switchGroup = useCallback((group: UserGroup) => {
