@@ -12,6 +12,42 @@ import api from "@/lib/api";
 import type { UploadResponse } from "@/types";
 import { TEMPLATE_LIST, TEMPLATE_MAP } from "../templates";
 import MessageModal from "@/components/MessageModal";
+import { ImageCropper, type CropShapeName } from "@/components/ui/shape-image-cropper";
+
+/** Which shape each template's gallery photo slots should be cropped to. `index` is the
+ *  slot's position in the eventual `images` array (upload order), 0-based. */
+function gallerySlotShape(templateId: string | null, index: number): CropShapeName {
+  switch (templateId) {
+    case "sunset-talk": // Cinematic — single ultra-wide photo
+      return "cinematic";
+    case "latenight-walk": // Night Mode — single 4:3 photo
+      return "classic";
+    case "music-sharing": // Vinyl — circular disc cover
+      return "circle";
+    case "chill-food": // Rooftop Glow — images[0] is the wide hero banner, rest are gallery tiles
+      return index === 0 ? "wide" : "square";
+    default: // Energy Rush, Birthday Bash, Cake Parallax — square gallery/polaroid tiles
+      return "square";
+  }
+}
+
+/** Which shape the "hero images" slots (up to 2, template-specific) should be cropped to. */
+function heroImageShape(templateId: string | null): CropShapeName {
+  if (templateId === "birthday-bash") return "circle"; // small circular hero thumbnails
+  return "square"; // Energy Rush polaroids, Cake Parallax layers
+}
+
+type CropTarget =
+  | { kind: "gallery" }
+  | { kind: "heroBg" }
+  | { kind: "heroImg"; index: number };
+
+interface CropQueueItem {
+  file: File;
+  url: string;
+  shape: CropShapeName;
+  target: CropTarget;
+}
 
 const TipTapEditor = dynamic(
   () => import("@/components/TipTapEditor").then((m) => m.TipTapEditor),
@@ -44,6 +80,10 @@ export default function NewMomentPage() {
   const heroBgInputRef = useRef<HTMLInputElement>(null);
   const heroImgInputRef = useRef<HTMLInputElement>(null);
   const heroImgSlotRef = useRef<number>(0);
+  // Every picked file is cropped to its slot's shape before it lands in state.
+  // Queued so multi-select gallery picks are cropped one at a time.
+  const [cropQueue, setCropQueue] = useState<CropQueueItem[]>([]);
+  const [activeCrop, setActiveCrop] = useState<CropQueueItem | null>(null);
 
   // Regenerate preview URLs whenever files change
   useEffect(() => {
@@ -81,25 +121,69 @@ export default function NewMomentPage() {
     heroImgInputRef.current?.click();
   }, []);
 
+  const enqueueCrops = (items: CropQueueItem[]) => {
+    if (items.length) setCropQueue((prev) => [...prev, ...items]);
+  };
+
+  // Pop the next queued file into the cropper whenever it's free.
+  useEffect(() => {
+    if (!activeCrop && cropQueue.length > 0) {
+      setActiveCrop(cropQueue[0]);
+      setCropQueue((prev) => prev.slice(1));
+    }
+  }, [activeCrop, cropQueue]);
+
+  const handleCropSave = ({ file, previewUrl }: { file: File; previewUrl: string }) => {
+    if (!activeCrop) return;
+    URL.revokeObjectURL(previewUrl); // each state slot generates its own preview URL from `file`
+    URL.revokeObjectURL(activeCrop.url);
+    const { target } = activeCrop;
+    if (target.kind === "gallery") {
+      setFiles((prev) => [...prev, file]);
+    } else if (target.kind === "heroBg") {
+      setHeroBgFile(file);
+    } else {
+      const idx = target.index;
+      setHeroImgFiles((prev) => { const next = [...prev]; next[idx] = file; return next; });
+    }
+    setActiveCrop(null);
+  };
+
+  const handleCropCancel = () => {
+    if (activeCrop) URL.revokeObjectURL(activeCrop.url);
+    setActiveCrop(null);
+  };
+
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files ?? []);
-    if (picked.length) setFiles((prev) => [...prev, ...picked]);
     e.target.value = "";
+    if (!picked.length) return;
+    const startIndex = files.length;
+    enqueueCrops(
+      picked.map((file, i) => ({
+        file,
+        url: URL.createObjectURL(file),
+        shape: gallerySlotShape(activeTemplate, startIndex + i),
+        target: { kind: "gallery" as const },
+      })),
+    );
   };
 
   const handleHeroBgInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) setHeroBgFile(f);
     e.target.value = "";
+    if (!f) return;
+    enqueueCrops([{ file: f, url: URL.createObjectURL(f), shape: "wide", target: { kind: "heroBg" } }]);
   };
 
   const handleHeroImgInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
-    if (f) {
-      const idx = heroImgSlotRef.current;
-      setHeroImgFiles((prev) => { const next = [...prev]; next[idx] = f; return next; });
-    }
     e.target.value = "";
+    if (!f) return;
+    const index = heroImgSlotRef.current;
+    enqueueCrops([
+      { file: f, url: URL.createObjectURL(f), shape: heroImageShape(activeTemplate), target: { kind: "heroImg", index } },
+    ]);
   };
 
   function selectTemplate(id: string) {
@@ -189,6 +273,15 @@ export default function NewMomentPage() {
         accept="image/*"
         className="sr-only"
         onChange={handleHeroImgInputChange}
+      />
+
+      <ImageCropper
+        open={!!activeCrop}
+        image={activeCrop?.url ?? null}
+        shape={activeCrop?.shape ?? "square"}
+        fileName={activeCrop?.file.name}
+        onClose={handleCropCancel}
+        onCropComplete={handleCropSave}
       />
 
       {/* Header */}
