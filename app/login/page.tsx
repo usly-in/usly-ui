@@ -41,7 +41,7 @@ function LoginContent() {
         className="glass-panel relative z-10 w-full max-w-sm p-8 sm:p-10"
       >
         <div className="text-center mb-10">
-          <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" priority />
+          <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={80} className="mx-auto mb-6" style={{ width: 120, height: 80 }} priority />
           <h1 className="text-2xl font-light tracking-tight text-[#f5f5f5]">Welcome back</h1>
           <p className="text-sm text-[#888] mt-1.5">Sign in to your memory lane</p>
         </div>

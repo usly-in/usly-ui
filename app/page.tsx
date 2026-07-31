@@ -84,7 +84,7 @@ export default function LandingPage() {
         {/* Nav */}
         <nav className="fixed top-0 inset-x-0 z-50 border-b border-[#2a2a2a] backdrop-blur-sm">
           <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-            <Image src="/usly-lockup-hero.svg" alt="usly" width={100} height={38} priority />
+            <Image src="/usly-lockup-hero.svg" alt="usly" width={100} height={38} style={{ width: 100, height: 38 }} priority />
             <div className="flex items-center gap-4">
               <Link
                 href="/login"

@@ -183,8 +183,8 @@ body {
   position: relative;
   border-radius: 28px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.45),
     0 1px 0 rgba(255, 255, 255, 0.08) inset,
@@ -204,16 +204,13 @@ body {
 }
 
 .glass-pill {
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  backdrop-filter: blur(18px) saturate(180%);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.12) inset;
+  -webkit-backdrop-filter: blur(9px) saturate(180%);
+  backdrop-filter: blur(9px) saturate(180%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 .glass-pill:hover {
   background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.28);
 }
 .glass-pill:active {
   transform: scale(0.96);

@@ -107,7 +107,7 @@ function SignupContent() {
           Back
         </button>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel relative z-10 w-full max-w-sm text-center p-8 sm:p-10">
-          <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" priority />
+          <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={80} className="mx-auto mb-6" style={{ width: 120, height: 80 }} priority />
           <h1 className="text-2xl font-light tracking-tight mb-2">Create your memory lane</h1>
           <p className="text-[#888] text-sm mb-8 max-w-xs mx-auto">A private space to capture moments, write chapters, and leave letters for each other.</p>
           <button onClick={handleGoogleSignIn}
@@ -138,7 +138,7 @@ function SignupContent() {
 
         {step === "welcome" && (
           <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="glass-panel relative z-10 w-full max-w-sm text-center p-8 sm:p-10">
-            <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" priority />
+            <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" style={{ width: 120, height: 46 }} priority />
             <h1 className="text-2xl font-light tracking-tight mb-2">Hi, {user?.name?.split(" ")[0]} 👋</h1>
             <p className="text-[#888] text-sm mb-8">Let&apos;s set up your first memory lane.</p>
             <button onClick={() => setStep("group")}
