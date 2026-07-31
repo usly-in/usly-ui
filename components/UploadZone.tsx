@@ -44,11 +44,9 @@ export function UploadZone({ onFilesSelected, maxFiles = 6, className }: UploadZ
   );
 
   const removeFile = (idx: number) => {
-    setFiles((prev) => {
-      const next = prev.filter((_, i) => i !== idx);
-      onFilesSelected(next);
-      return next;
-    });
+    const next = files.filter((_, i) => i !== idx);
+    setFiles(next);
+    onFilesSelected(next);
     setPreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
