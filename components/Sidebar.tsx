@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, type AuthUser } from "@/lib/auth-client";
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
 import {
@@ -28,6 +28,12 @@ import {
 } from "lucide-react";
 import type { GroupType, UserGroup } from "@/types";
 
+const noopSubscribe = () => () => {};
+// Server always renders unmounted; client flips to true post-hydration without a render-triggering effect.
+function useHydrated() {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+}
+
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/moments", label: "Moments", icon: ImageIcon },
@@ -49,11 +55,7 @@ function GroupSwitcher({ onClose }: { onClose?: () => void }) {
   const { user, switchGroup } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useHydrated();
 
   const groups: UserGroup[] = user?.groups ?? [];
   const activeTenantId = user?.tenantId;
@@ -266,11 +268,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useHydrated();
 
   const items = navItems.filter(
     (item) => !item.adminOnly || user?.role === "admin"
