@@ -6,6 +6,7 @@ import { Cinematic } from "./Cinematic";
 import { NightMode } from "./NightMode";
 import { Vinyl } from "./Vinyl";
 import { BirthdayBash } from "./BirthdayBash";
+import CakeParallax from "./CakeParallax";
 
 export type { TemplateProps, TemplateEntry };
 
@@ -17,6 +18,7 @@ export const TEMPLATE_MAP: Record<string, ComponentType<TemplateProps>> = {
   "latenight-walk": NightMode,
   "music-sharing": Vinyl,
   "birthday-bash": BirthdayBash,
+  "cake-parallax": CakeParallax,
 };
 
 /** Ordered list used by pickers and renderers */
@@ -90,6 +92,17 @@ export const TEMPLATE_LIST: TemplateEntry[] = [
       title: "Birthday Bash",
       caption: "Cake, friends, and confetti",
       story: "A night of celebration — cake, candles, and the people who make life brighter.",
+    },
+  },
+  {
+    id: "cake-parallax",
+    name: "Cake Parallax",
+    tag: "Birthday",
+    emoji: "🎂",
+    placeholders: {
+      title: "Cake Time",
+      caption: "Layered cake with parallax",
+      story: "Happy Birthday!",
     },
   },
 ];

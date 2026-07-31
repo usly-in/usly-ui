@@ -28,6 +28,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    if (!process.env.API_URL) return [];
+    return [
+      {
+        source: "/api/proxy/:path*",
+        destination: `${process.env.API_URL}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
