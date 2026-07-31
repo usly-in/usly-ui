@@ -215,7 +215,8 @@ function SidebarContent({ isMobile = false, items, pathname, user, onLogout, onC
       <nav suppressHydrationWarning className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {items.map((item) => {
           const Icon = item.icon;
-          const active = mounted && (pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href)));
+          const normalizedPathname = pathname?.replace(/\/$/, "") || "";
+          const active = mounted && (normalizedPathname === item.href || (item.href !== "/dashboard" && normalizedPathname.startsWith(item.href)));
           return (
             <Link
               key={item.href}
@@ -277,7 +278,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden md:flex flex-col w-60 min-h-screen bg-[#0d0d0d] border-r border-[#2a2a2a] shrink-0">
+      <aside className="hidden md:flex flex-col w-60 h-screen sticky top-0 bg-[#0d0d0d] border-r border-[#2a2a2a] shrink-0 overflow-hidden">
         {mounted ? (
           <SidebarContent mounted={mounted} items={items} pathname={pathname} user={user} onLogout={logout} onClose={() => setOpen(false)} />
         ) : (
