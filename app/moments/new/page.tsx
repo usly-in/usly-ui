@@ -365,7 +365,10 @@ export default function NewMomentPage() {
                   heroBackground: heroBgPreview,
                   cakeLayers: heroImgPreviews,
                   onHeroBackgroundClick: handleHeroBackgroundClick,
-                  onCakeLayerClick: (index: number) => { templateDataRef.current = { ...templateDataRef.current, cakeLayers: (templateDataRef.current.cakeLayers ?? heroImgPreviews).slice ? (templateDataRef.current.cakeLayers as string[]).map(String) : heroImgPreviews }; },
+                  onCakeLayerClick: (index: number) => {
+                    const cakeLayers = (templateDataRef.current.cakeLayers as string[] | undefined) ?? heroImgPreviews;
+                    templateDataRef.current = { ...templateDataRef.current, cakeLayers };
+                  },
                 })}
               />
             </div>
