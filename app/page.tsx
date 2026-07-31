@@ -121,8 +121,7 @@ export default function LandingPage() {
             variants={heroItemVariants}
             className="text-5xl md:text-7xl font-light tracking-tight leading-tight mb-6"
           >
-            Your shared
-            <br />
+            your{' '}
             <span className="text-[#e4a0a0]">memory lane</span>
           </motion.h1>
           <motion.p
