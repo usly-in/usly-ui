@@ -102,11 +102,11 @@ function SignupContent() {
     return (
       <div className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6 overflow-hidden">
         <SlidingEaseVerticalBars backgroundColor="#0b0b0b" lineColor="#2a2a2a" barColor="#e4a0a0" animationSpeed={0.004} />
-        <button onClick={() => router.push("/")} className="absolute z-10 top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
+        <button onClick={() => router.push("/")} className="glass-pill absolute z-20 top-5 left-5 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm text-[#f5f5f5] font-medium">
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full max-w-sm text-center">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-panel relative z-10 w-full max-w-sm text-center p-8 sm:p-10">
           <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" priority />
           <h1 className="text-2xl font-light tracking-tight mb-2">Create your memory lane</h1>
           <p className="text-[#888] text-sm mb-8 max-w-xs mx-auto">A private space to capture moments, write chapters, and leave letters for each other.</p>
@@ -130,14 +130,14 @@ function SignupContent() {
     <div className="relative min-h-screen bg-[#0b0b0b] flex items-center justify-center px-6 overflow-hidden">
       <SlidingEaseVerticalBars backgroundColor="#0b0b0b" lineColor="#2a2a2a" barColor="#e4a0a0" animationSpeed={0.004} />
       <MessageModal open={!!popupMessage} onClose={() => setPopupMessage(null)} title="Error" message={popupMessage ?? ""} />
-      <button onClick={() => router.push(isNewGroup ? "/dashboard" : "/")} className="absolute z-10 top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors">
+      <button onClick={() => router.push(isNewGroup ? "/dashboard" : "/")} className="glass-pill absolute z-20 top-5 left-5 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm text-[#f5f5f5] font-medium">
         <ArrowLeft className="w-4 h-4" />
         Back
       </button>
       <AnimatePresence mode="wait">
 
         {step === "welcome" && (
-          <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="relative z-10 w-full max-w-sm text-center">
+          <motion.div key="welcome" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="glass-panel relative z-10 w-full max-w-sm text-center p-8 sm:p-10">
             <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" priority />
             <h1 className="text-2xl font-light tracking-tight mb-2">Hi, {user?.name?.split(" ")[0]} 👋</h1>
             <p className="text-[#888] text-sm mb-8">Let&apos;s set up your first memory lane.</p>
@@ -149,7 +149,7 @@ function SignupContent() {
         )}
 
         {step === "group" && (
-          <motion.div key="group" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="relative z-10 w-full max-w-sm">
+          <motion.div key="group" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="glass-panel relative z-10 w-full max-w-sm p-8 sm:p-10">
             {isNewGroup && (
               <p className="text-xs text-[#888] capitalize mb-1">Hi, {user?.name?.split(" ")[0]} 👋</p>
             )}
@@ -194,7 +194,7 @@ function SignupContent() {
         )}
 
         {step === "names" && (
-          <motion.div key="names" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="relative z-10 w-full max-w-sm">
+          <motion.div key="names" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="glass-panel relative z-10 w-full max-w-sm p-8 sm:p-10">
             <h2 className="text-xl font-light tracking-tight mb-1">What&apos;s this memory lane called?</h2>
             <p className="text-[#888] text-sm mb-6">
               {nameSectionHint}
@@ -217,7 +217,7 @@ function SignupContent() {
         )}
 
         {step === "date" && (
-          <motion.div key="date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="relative z-10 w-full max-w-sm">
+          <motion.div key="date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="glass-panel relative z-10 w-full max-w-sm p-8 sm:p-10">
             <h2 className="text-xl font-light tracking-tight mb-1">
               {form.groupType === "lover" ? "When did your story begin?" : "Any special start date?"}
             </h2>
@@ -240,7 +240,7 @@ function SignupContent() {
         )}
 
         {step === "done" && (
-          <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative z-10 text-center">
+          <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-panel relative z-10 text-center p-8 sm:p-10 w-full max-w-sm">
             <div className="text-5xl mb-4">✨</div>
             <h2 className="text-2xl font-light tracking-tight mb-2">Your memory lane is ready</h2>
             <p className="text-[#888] text-sm">Taking you there now…</p>

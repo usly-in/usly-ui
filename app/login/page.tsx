@@ -29,7 +29,7 @@ function LoginContent() {
       <SlidingEaseVerticalBars backgroundColor="#0b0b0b" lineColor="#2a2a2a" barColor="#e4a0a0" animationSpeed={0.004} />
       <Link
         href="/"
-        className="absolute z-10 top-5 left-5 flex items-center gap-1.5 text-sm text-[#888] hover:text-[#f5f5f5] transition-colors"
+        className="glass-pill absolute z-20 top-5 left-5 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm text-[#f5f5f5] font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -38,7 +38,7 @@ function LoginContent() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-sm"
+        className="glass-panel relative z-10 w-full max-w-sm p-8 sm:p-10"
       >
         <div className="text-center mb-10">
           <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={46} className="mx-auto mb-6" priority />
