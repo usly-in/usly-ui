@@ -18,7 +18,7 @@ export const metadata: Metadata = {
       { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/logo.png", sizes: "32x32", type: "image/png" },
     ],
-    apple: "/logo-hd.png",
+    apple: "/logo.png",
   },
   openGraph: {
     title: "usly — your shared memory lane",

@@ -1,9 +1,12 @@
 "use client";
 
 import { Suspense } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Heart } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import SlidingEaseVerticalBars from "@/components/ui/sliding-ease";
 
 function GoogleIcon() {
   return (
@@ -22,17 +25,23 @@ function LoginContent() {
   const error = params.get("error");
 
   return (
-    <div className="min-h-screen bg-[#0b0b0b] flex flex-col items-center justify-center px-6">
+    <div className="relative min-h-screen bg-[#0b0b0b] flex flex-col items-center justify-center px-6 overflow-hidden">
+      <SlidingEaseVerticalBars backgroundColor="#0b0b0b" lineColor="#2a2a2a" barColor="#e4a0a0" animationSpeed={0.004} />
+      <Link
+        href="/"
+        className="glass-pill absolute z-20 top-5 left-5 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm text-[#f5f5f5] font-medium"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </Link>
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-sm"
+        className="glass-panel relative z-10 w-full max-w-sm p-8 sm:p-10"
       >
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#e4a0a0]/10 mb-4">
-            <Heart className="w-6 h-6 text-[#e4a0a0] fill-current" />
-          </div>
+          <Image src="/usly-lockup-hero.svg" alt="usly" width={120} height={80} className="mx-auto mb-6" style={{ width: 120, height: 80 }} priority />
           <h1 className="text-2xl font-light tracking-tight text-[#f5f5f5]">Welcome back</h1>
           <p className="text-sm text-[#888] mt-1.5">Sign in to your memory lane</p>
         </div>

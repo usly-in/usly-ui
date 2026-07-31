@@ -84,29 +84,7 @@ export default function LandingPage() {
         {/* Nav */}
         <nav className="fixed top-0 inset-x-0 z-50 border-b border-[#2a2a2a] backdrop-blur-sm">
           <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-            <svg
-              viewBox="0 0 260 80"
-              width="100"
-              height="32"
-              xmlns="http://www.w3.org/2000/svg"
-              className="overflow-visible"
-            >
-              <text
-                x="130"
-                y="65"
-                textAnchor="middle"
-                fontFamily="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
-                fontWeight="900"
-                fontSize="72"
-                fill="none"
-                stroke="#e4a0a0"
-                strokeWidth="1.5"
-                letterSpacing="-2"
-                className="usly-text"
-              >
-                usly
-              </text>
-            </svg>
+            <Image src="/usly-lockup-hero.svg" alt="usly" width={100} height={38} style={{ width: 100, height: 38 }} priority />
             <div className="flex items-center gap-4">
               <Link
                 href="/login"
