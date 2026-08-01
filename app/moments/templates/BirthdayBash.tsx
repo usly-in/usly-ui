@@ -124,6 +124,45 @@ function SectionHeader({ children }: Readonly<{ children: React.ReactNode }>) {
   );
 }
 
+// ── Confetti — a few tastefully scattered, gently drifting pieces ──────────
+
+const CONFETTI_COLORS = ["#f472b6", "#facc15", "#818cf8", "#34d399", "#fb923c", "#f43f5e"];
+
+const CONFETTI_PIECES = Array.from({ length: 16 }, (_, i) => ({
+  left: (i * 37) % 100,
+  top: (i * 53) % 100,
+  rotate: (i * 47) % 360,
+  size: 5 + (i % 3) * 3,
+  color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+  delay: (i % 5) * 0.35,
+  round: i % 3 === 0,
+}));
+
+function ConfettiField({ density = 16 }: Readonly<{ density?: number }>) {
+  const pieces = CONFETTI_PIECES.slice(0, density);
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {pieces.map((p, i) => (
+        <motion.span
+          key={i}
+          className="absolute block"
+          style={{
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            width: p.size,
+            height: p.size,
+            backgroundColor: p.color,
+            borderRadius: p.round ? "9999px" : "2px",
+          }}
+          initial={{ opacity: 0, rotate: p.rotate }}
+          animate={{ opacity: [0, 0.7, 0.7, 0], y: [0, 8, 18], rotate: p.rotate + 50 }}
+          transition={{ duration: 4 + (i % 3), repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── Hero — centered circular hero with playful confetti ──────────────────────
 
 interface HeroProps {
@@ -334,7 +373,12 @@ function TagCloudSection({ tags: initialTags, editMode, onTagsChange, }: Readonl
   );
 }
 
-// ── Highlights (compact list) ─────────────────────────────────────────────────
+// ── Highlights — scattered photo-booth prints, not a clean grid ─────────────
+
+const HL_ROTATE = [-7, 5, -4, 8, -6, 4, -8, 6];
+const HL_OFFSET_Y = [0, 22, -8, 16, 4, -14, 20, -4];
+const HL_TAPE_ROTATE = [-18, 22, -25, 15, -20, 26];
+const HL_TAPE_COLOR = ["#f472b6", "#facc15", "#818cf8", "#34d399", "#fb923c"];
 
 function HighlightsSection({ highlights: initialHighlights, editMode, onHighlightsChange, }: Readonly<{ highlights: Highlight[]; editMode?: boolean; onHighlightsChange?: (highlights: Highlight[]) => void; }>) {
   const ref = useRef<HTMLDivElement>(null);
@@ -343,31 +387,51 @@ function HighlightsSection({ highlights: initialHighlights, editMode, onHighligh
   const update = (next: Array<Highlight & { _k: string }>) => { setItems(next); onHighlightsChange?.(next.map(({ icon, title, description }) => ({ icon, title, description }))); };
   const updateItem = (i: number, patch: Partial<Highlight>) => update(items.map((h, idx) => (idx === i ? { ...h, ...patch } : h)));
   return (
-    <div className="px-6 md:px-8 py-5" ref={ref}>
-      <SectionHeader>✦ Highlights</SectionHeader>
-      <motion.div className="space-y-3" variants={staggerContainer} initial="hidden" animate={inView ? "visible" : "hidden"}>
+    <div className="relative px-6 md:px-8 py-8" ref={ref}>
+      <ConfettiField density={12} />
+      <SectionHeader>✦ Party Favors</SectionHeader>
+      <motion.div className="relative flex flex-wrap justify-center gap-x-5 gap-y-10 pt-2 pb-4" variants={staggerContainer} initial="hidden" animate={inView ? "visible" : "hidden"}>
         {items.map((h, i) => (
-          <motion.div key={h._k} variants={fadeUp} className="flex items-start gap-3 bg-[#0f0f0f] rounded-2xl p-4">
-            <div className="text-2xl select-none">{h.icon}</div>
-            <div className="flex-1">
+          <div
+            key={h._k}
+            style={{ transform: `rotate(${HL_ROTATE[i % HL_ROTATE.length]}deg) translateY(${HL_OFFSET_Y[i % HL_OFFSET_Y.length]}px)` }}
+          >
+            <motion.div
+              variants={fadeUp}
+              whileHover={{ scale: 1.05, rotate: 0 }}
+              className="relative w-40 bg-[#fdf8ef] text-[#2a2118] shadow-[0_10px_24px_rgba(0,0,0,0.4)] pt-4 px-3 pb-5"
+            >
+              <span
+                className="absolute -top-3 left-1/2 w-10 h-4 opacity-80"
+                style={{ backgroundColor: HL_TAPE_COLOR[i % HL_TAPE_COLOR.length], transform: `translateX(-50%) rotate(${HL_TAPE_ROTATE[i % HL_TAPE_ROTATE.length]}deg)` }}
+              />
+              <div className="text-4xl text-center select-none mb-3">{h.icon}</div>
               {editMode ? (
-                <input value={h.title} onChange={(e) => updateItem(i, { title: e.target.value })} className="w-full bg-transparent text-sm font-semibold text-white outline-none" />
+                <input value={h.title} onChange={(e) => updateItem(i, { title: e.target.value })} className="w-full bg-transparent text-sm font-semibold text-center outline-none border-b border-black/10" />
               ) : (
-                <div className="text-sm font-semibold text-white">{h.title}</div>
+                <div className="text-sm font-semibold text-center font-serif italic">{h.title}</div>
               )}
               {editMode ? (
-                <textarea value={h.description} onChange={(e) => updateItem(i, { description: e.target.value })} rows={2} className="w-full bg-transparent text-xs text-white/60 mt-1 outline-none resize-none" />
+                <textarea value={h.description} onChange={(e) => updateItem(i, { description: e.target.value })} rows={2} className="w-full bg-transparent text-[11px] text-black/60 mt-1 outline-none resize-none text-center" />
               ) : (
-                <div className="text-xs text-white/60 mt-1">{h.description}</div>
+                <div className="text-[11px] text-black/50 mt-1 text-center">{h.description}</div>
               )}
-            </div>
-            {editMode && <button onClick={() => update(items.filter((_, idx) => idx !== i))} className="text-white/30 hover:text-red-400" aria-label="Remove"><Trash2 size={14} /></button>}
-          </motion.div>
+              {editMode && (
+                <button onClick={() => update(items.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 text-black/30 hover:text-red-500" aria-label="Remove">
+                  <Trash2 size={12} />
+                </button>
+              )}
+            </motion.div>
+          </div>
         ))}
 
         {editMode && (
-          <motion.button variants={fadeUp} onClick={() => update([...items, { icon: "✨", title: "New", description: "…", _k: genKey("hl") }])} className="flex items-center gap-2 bg-[#0f0f0f] border border-dashed border-white/8 rounded-2xl p-3 text-white/60">
-            <Plus size={14} /> Add highlight
+          <motion.button
+            variants={fadeUp}
+            onClick={() => update([...items, { icon: "🎊", title: "New", description: "…", _k: genKey("hl") }])}
+            className="w-40 flex flex-col items-center justify-center gap-2 bg-white/5 border-2 border-dashed border-white/15 text-white/50 pt-8 pb-9"
+          >
+            <Plus size={16} /> Add favor
           </motion.button>
         )}
       </motion.div>
@@ -438,7 +502,9 @@ function GallerySection({ images, editMode, onImageSlotClick, galleryCaptions = 
   );
 }
 
-// ── Stats (circular badges) ─────────────────────────────────────────────────
+// ── Stats — party balloons instead of numbered cards ─────────────────────────
+
+const BALLOON_COLORS = ["#f97316", "#ec4899", "#6366f1", "#10b981", "#eab308", "#f43f5e"];
 
 function StatsSection({ stats: initialStats, editMode, onStatsChange, }: Readonly<{ stats: Stat[]; editMode?: boolean; onStatsChange?: (stats: Stat[]) => void; }>) {
   const ref = useRef<HTMLDivElement>(null);
@@ -447,27 +513,46 @@ function StatsSection({ stats: initialStats, editMode, onStatsChange, }: Readonl
   const update = (next: Array<Stat & { _k: string }>) => { setStats(next); onStatsChange?.(next.map(({ label, value }) => ({ label, value }))); };
   const updateItem = (i: number, patch: Partial<Stat>) => update(stats.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
   return (
-    <div className="px-6 md:px-8 py-5" ref={ref}>
-      <SectionHeader>✦ Quick Stats</SectionHeader>
-      <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-3" variants={staggerContainer} initial="hidden" animate={inView ? "visible" : "hidden"}>
-        {stats.map((s, i) => (
-          <motion.div key={s._k} variants={fadeUp} className="flex flex-col items-center gap-2 bg-[#0f0f0f] rounded-2xl p-4">
-            {editMode ? (
-              <input value={s.value} onChange={(e) => updateItem(i, { value: e.target.value })} className="bg-transparent text-2xl font-black text-white text-center outline-none" />
-            ) : (
-              <div className="text-2xl font-black text-white">{s.value}</div>
-            )}
-            {editMode ? (
-              <input value={s.label} onChange={(e) => updateItem(i, { label: e.target.value })} className="bg-transparent text-xs text-white/60 text-center outline-none" />
-            ) : (
-              <div className="text-xs text-white/60 uppercase">{s.label}</div>
-            )}
-          </motion.div>
-        ))}
+    <div className="px-6 md:px-8 py-8" ref={ref}>
+      <SectionHeader>✦ Balloon Count</SectionHeader>
+      <motion.div className="flex flex-wrap items-end justify-center gap-6 pt-2" variants={staggerContainer} initial="hidden" animate={inView ? "visible" : "hidden"}>
+        {stats.map((s, i) => {
+          const color = BALLOON_COLORS[i % BALLOON_COLORS.length];
+          return (
+            <motion.div key={s._k} variants={fadeUp} className="relative flex flex-col items-center">
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3 + (i % 3) * 0.6, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+                className="relative w-20 h-24 flex items-center justify-center shadow-[0_8px_18px_rgba(0,0,0,0.35)]"
+                style={{ backgroundColor: color, borderRadius: "50% 50% 50% 50% / 58% 58% 42% 42%" }}
+              >
+                <div className="absolute top-3 left-4 w-4 h-6 bg-white/30 rounded-full blur-[2px] pointer-events-none" />
+                {editMode ? (
+                  <input value={s.value} onChange={(e) => updateItem(i, { value: e.target.value })} className="bg-transparent text-lg font-black text-white text-center outline-none w-14" />
+                ) : (
+                  <div className="text-lg font-black text-white text-center px-1">{s.value}</div>
+                )}
+                <div
+                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0"
+                  style={{ borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: `7px solid ${color}` }}
+                />
+              </motion.div>
+              <div className="w-px h-6 bg-white/20 mt-1" />
+              {editMode ? (
+                <input value={s.label} onChange={(e) => updateItem(i, { label: e.target.value })} className="bg-transparent text-[10px] text-white/60 text-center outline-none uppercase tracking-wide" />
+              ) : (
+                <div className="text-[10px] text-white/60 uppercase tracking-wide mt-0.5">{s.label}</div>
+              )}
+              {editMode && (
+                <button onClick={() => update(stats.filter((_, idx) => idx !== i))} className="mt-1 text-white/30 hover:text-red-400" aria-label="Remove"><Trash2 size={12} /></button>
+              )}
+            </motion.div>
+          );
+        })}
 
         {editMode && (
-          <motion.button variants={fadeUp} onClick={() => update([...stats, { value: "—", label: "New", _k: genKey("st") }])} className="flex items-center justify-center gap-2 bg-[#0f0f0f] border border-dashed border-white/8 rounded-2xl p-4 text-white/60">
-            <Plus size={14} /> Add stat
+          <motion.button variants={fadeUp} onClick={() => update([...stats, { value: "—", label: "New", _k: genKey("st") }])} className="flex flex-col items-center justify-center gap-1 w-20 h-24 border-2 border-dashed border-white/15 rounded-full text-white/50">
+            <Plus size={14} />
           </motion.button>
         )}
       </motion.div>
@@ -475,7 +560,7 @@ function StatsSection({ stats: initialStats, editMode, onStatsChange, }: Readonl
   );
 }
 
-// ── Timeline (condensed) ────────────────────────────────────────────────────
+// ── Timeline — printed party program / invitation card ───────────────────────
 
 function TimelineSection({ timeline: initialTimeline, editMode, onTimelineChange, }: Readonly<{ timeline: TimelineStep[]; editMode?: boolean; onTimelineChange?: (timeline: TimelineStep[]) => void; }>) {
   const ref = useRef<HTMLDivElement>(null);
@@ -484,27 +569,57 @@ function TimelineSection({ timeline: initialTimeline, editMode, onTimelineChange
   const update = (next: Array<TimelineStep & { _k: string }>) => { setSteps(next); onTimelineChange?.(next.map(({ time, title, description }) => ({ time, title, description }))); };
   const updateItem = (i: number, patch: Partial<TimelineStep>) => update(steps.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
   return (
-    <div className="px-6 md:px-8 py-5" ref={ref}>
-      <SectionHeader>✦ Timeline</SectionHeader>
-      <motion.div className="flex flex-col gap-3" variants={staggerContainer} initial="hidden" animate={inView ? "visible" : "hidden"}>
-        {steps.map((s, i) => (
-          <motion.div key={s._k} variants={fadeUp} className="flex items-start gap-3">
-            <div className="w-10 text-xs text-white/60">{s.time}</div>
-            <div className="flex-1 bg-[#0f0f0f] rounded-2xl p-3">
-              {editMode ? (
-                <input value={s.title} onChange={(e) => updateItem(i, { title: e.target.value })} className="w-full bg-transparent outline-none text-sm text-white" />
-              ) : (
-                <div className="text-sm font-semibold text-white">{s.title}</div>
-              )}
-              {editMode ? (
-                <textarea value={s.description ?? ""} onChange={(e) => updateItem(i, { description: e.target.value })} rows={2} className="w-full bg-transparent text-xs text-white/60 mt-1 outline-none resize-none" />
-              ) : (
-                s.description && <div className="text-xs text-white/60 mt-1">{s.description}</div>
-              )}
+    <div className="px-6 md:px-8 py-8" ref={ref}>
+      <SectionHeader>✦ Order of Celebration</SectionHeader>
+      <motion.div
+        className="relative mx-auto max-w-md bg-[#fdf8ef] text-[#2a2118] px-6 py-8 shadow-[0_14px_30px_rgba(0,0,0,0.45)] border border-black/8"
+        initial={{ opacity: 0, y: 16 }}
+        animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="absolute top-3 left-3 text-lg opacity-30 select-none">✦</div>
+        <div className="absolute top-3 right-3 text-lg opacity-30 select-none">✦</div>
+        <div className="absolute bottom-3 left-3 text-lg opacity-30 select-none">✦</div>
+        <div className="absolute bottom-3 right-3 text-lg opacity-30 select-none">✦</div>
+
+        <div className="text-center mb-6">
+          <div className="font-serif italic text-2xl">The Program</div>
+          <div className="text-[10px] uppercase tracking-[0.3em] text-black/40 mt-1">— festivities &amp; frivolity —</div>
+        </div>
+
+        <div className="flex flex-col">
+          {steps.map((s, i) => (
+            <div key={s._k}>
+              {i > 0 && <div className="text-center text-black/25 text-xs my-3 select-none">• ✦ •</div>}
+              <div className="text-center relative">
+                {editMode ? (
+                  <input value={s.time ?? ""} onChange={(e) => updateItem(i, { time: e.target.value })} placeholder="Time" className="bg-transparent text-[11px] font-semibold uppercase tracking-widest text-center outline-none border-b border-black/10 w-24 mx-auto block" />
+                ) : (
+                  s.time && <div className="text-[11px] font-semibold uppercase tracking-widest">{s.time}</div>
+                )}
+                {editMode ? (
+                  <input value={s.title} onChange={(e) => updateItem(i, { title: e.target.value })} className="w-full bg-transparent font-serif italic text-lg text-center outline-none mt-1" />
+                ) : (
+                  <div className="font-serif italic text-lg mt-1">{s.title}</div>
+                )}
+                {editMode ? (
+                  <textarea value={s.description ?? ""} onChange={(e) => updateItem(i, { description: e.target.value })} rows={2} className="w-full bg-transparent text-xs text-black/50 text-center outline-none resize-none mt-1" />
+                ) : (
+                  s.description && <div className="text-xs text-black/50 mt-1">{s.description}</div>
+                )}
+                {editMode && (
+                  <button onClick={() => update(steps.filter((_, idx) => idx !== i))} className="mt-2 text-black/30 hover:text-red-500" aria-label="Remove"><Trash2 size={12} /></button>
+                )}
+              </div>
             </div>
-          </motion.div>
-        ))}
-        {editMode && <motion.button variants={fadeUp} onClick={() => update([...steps, { time: "", title: "New step", description: "", _k: genKey("tl") }])} className="text-white/60 flex items-center gap-2"><Plus size={14} /> Add step</motion.button>}
+          ))}
+        </div>
+
+        {editMode && (
+          <button onClick={() => update([...steps, { time: "", title: "New moment", description: "", _k: genKey("tl") }])} className="mt-4 mx-auto flex items-center gap-2 text-black/40 hover:text-black/70 text-sm">
+            <Plus size={14} /> Add to program
+          </button>
+        )}
       </motion.div>
     </div>
   );
@@ -538,7 +653,9 @@ function CTASection({ cta, editMode, onCTAChange, }: Readonly<{ cta?: { readonly
   );
 }
 
-// ── Wishes (list + optional add form) ───────────────────────────────────────
+// ── Wishes — gift tags hung on a string, not a bordered card grid ──────────
+
+const WISH_ROTATE = [-6, 4, -8, 6, -4, 8, -5];
 
 function WishesSection({ initialWishes = [], editMode, onWishesChange, }: Readonly<{ initialWishes?: Wish[]; editMode?: boolean; onWishesChange?: (w: Wish[]) => void; }>) {
   const [wishes, setWishes] = useState<Array<Wish & { _k: string }>>(() => (initialWishes ?? []).map((w) => ({ ...w, _k: genKey("w") })));
@@ -556,22 +673,38 @@ function WishesSection({ initialWishes = [], editMode, onWishesChange, }: Readon
   const remove = (k: string) => update(wishes.filter((w) => w._k !== k));
 
   return (
-    <div className="px-6 md:px-8 py-6">
-      <SectionHeader>✦ Wishes</SectionHeader>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {wishes.map((w) => (
-          <div key={w._k} className="bg-[#0f0f0f] rounded-2xl p-4">
-            <div className="text-sm font-semibold text-white">{w.name}</div>
-            <div className="text-xs text-white/60 mt-2">{w.message}</div>
-            {editMode && <button onClick={() => remove(w._k)} className="mt-3 text-white/40" aria-label="Remove wish"><Trash2 size={14} /></button>}
-          </div>
-        ))}
+    <div className="px-6 md:px-8 py-8">
+      <SectionHeader>✦ Gift Tags</SectionHeader>
+
+      <div className="relative pt-8 pb-2">
+        <div className="absolute top-6 left-2 right-2 h-px bg-white/15" />
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-10 px-2">
+          {wishes.map((w, i) => (
+            <div key={w._k} className="relative" style={{ marginTop: i % 2 === 0 ? 4 : 18 }}>
+              <div className="absolute left-1/2 -translate-x-1/2 -top-8 w-px h-8 bg-white/20" />
+              <div
+                className="relative w-36 bg-[#efe3c8] text-[#3a2c1a] pl-5 pr-3 pt-3 pb-4 shadow-[0_10px_20px_rgba(0,0,0,0.4)]"
+                style={{
+                  transform: `rotate(${WISH_ROTATE[i % WISH_ROTATE.length]}deg)`,
+                  clipPath: "polygon(16% 0, 100% 0, 100% 100%, 16% 100%, 0 50%)",
+                }}
+              >
+                <span className="absolute left-[10%] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border border-black/30 bg-[#fdf8ef]" />
+                <div className="text-xs font-bold uppercase tracking-wide">{w.name}</div>
+                <div className="text-[11px] mt-1 italic text-black/70">{w.message}</div>
+                {editMode && (
+                  <button onClick={() => remove(w._k)} className="absolute top-1 right-1 text-black/30 hover:text-red-500" aria-label="Remove wish"><Trash2 size={11} /></button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-col sm:flex-row gap-2">
+      <div className="mt-4 flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="bg-transparent border border-white/8 px-3 py-2 rounded-lg flex-1 outline-none" />
         <input value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Your wish" className="bg-transparent border border-white/8 px-3 py-2 rounded-lg flex-2 outline-none" />
-        <button onClick={add} className="bg-white text-black px-4 py-2 rounded-full">Add</button>
+        <button onClick={add} className="bg-white text-black px-4 py-2 rounded-full">Tie it on</button>
       </div>
     </div>
   );
