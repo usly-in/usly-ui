@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { Share2, Heart, Bookmark, X, ChevronLeft, ChevronRight, Plus, Trash2, ImageIcon, Camera } from "lucide-react";
+import { Share2, Heart, Bookmark, X, ChevronLeft, ChevronRight, Plus, Trash2, ImageIcon, Camera, Coins } from "lucide-react";
 import { EditableText, PhotoSlot } from "./_shared";
 import type { TemplateProps } from "./types";
 
@@ -583,11 +583,14 @@ function HighlightsSection({
   const updateItem = (i: number, patch: Partial<Highlight>) =>
     update(items.map((h, idx) => (idx === i ? { ...h, ...patch } : h)));
 
+  // Alternate scatter/tilt per ticket so the strip reads like real spooled-out tickets, not a grid
+  const TICKET_TILT = [-2.5, 1.5, -1, 2, -1.5, 1] as const;
+
   return (
-    <div className="px-6 md:px-8 py-5" ref={ref}>
-      <SectionHeader>✦ Memory Highlights</SectionHeader>
+    <div className="px-6 md:px-8 py-6" ref={ref}>
+      <SectionHeader>🎟️ Prize Tickets</SectionHeader>
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+        className="flex flex-wrap gap-x-2 gap-y-6"
         variants={staggerContainer}
         initial="hidden"
         animate={inView ? "visible" : "hidden"}
@@ -596,55 +599,75 @@ function HighlightsSection({
           <motion.div
             key={h._k}
             variants={fadeUp}
-            whileHover={editMode ? {} : { scale: 1.02, y: -4 }}
+            whileHover={editMode ? {} : { scale: 1.04, rotate: 0, y: -4, zIndex: 10 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="relative bg-[#111] border border-yellow-400/10 rounded-2xl p-5 hover:border-yellow-400/30 hover:shadow-lg hover:shadow-yellow-400/10 transition-shadow duration-300"
+            style={{ rotate: `${TICKET_TILT[i % TICKET_TILT.length]}deg` }}
+            className="relative w-44 shrink-0"
           >
-            {editMode && (
-              <button
-                type="button"
-                onClick={() => update(items.filter((_, idx) => idx !== i))}
-                className="absolute top-3 right-3 text-white/20 hover:text-red-400 transition-colors"
-                aria-label="Remove highlight"
-              >
-                <Trash2 size={14} />
-              </button>
-            )}
+            {/* Ticket body: perforated notches punched into left/right edges via matching-bg circles */}
+            <div className="relative bg-yellow-400/6 border-2 border-dashed border-yellow-400/30 rounded-md pt-3 pb-3 px-3 hover:border-yellow-400/60 hover:bg-yellow-400/10 transition-colors duration-300">
+              <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#090909]" />
+              <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#090909]" />
 
-            {editMode ? (
-              <input
-                value={h.icon}
-                onChange={(e) => updateItem(i, { icon: e.target.value })}
-                className="bg-transparent text-3xl w-12 mb-3 outline-none focus:ring-1 focus:ring-yellow-400/20 rounded"
-                maxLength={4}
-                aria-label="Icon emoji"
-              />
-            ) : (
-              <div className="text-3xl mb-3 select-none">{h.icon}</div>
-            )}
+              {editMode && (
+                <button
+                  type="button"
+                  onClick={() => update(items.filter((_, idx) => idx !== i))}
+                  className="absolute top-1 right-1 text-white/20 hover:text-red-400 transition-colors z-10"
+                  aria-label="Remove highlight"
+                >
+                  <Trash2 size={13} />
+                </button>
+              )}
 
-            {editMode ? (
-              <input
-                value={h.title}
-                onChange={(e) => updateItem(i, { title: e.target.value })}
-                placeholder="Moment title"
-                className="bg-transparent text-sm font-bold text-white w-full outline-none focus:ring-1 focus:ring-yellow-400/20 rounded placeholder-white/20 mb-1.5 block"
-              />
-            ) : (
-              <div className="text-sm font-bold text-white mb-1.5">{h.title}</div>
-            )}
+              {/* Top stub: icon + ticket number, like a skee-ball redemption ticket header */}
+              <div className="flex items-center justify-between mb-1.5">
+                {editMode ? (
+                  <input
+                    value={h.icon}
+                    onChange={(e) => updateItem(i, { icon: e.target.value })}
+                    className="bg-transparent text-2xl w-10 outline-none focus:ring-1 focus:ring-yellow-400/20 rounded"
+                    maxLength={4}
+                    aria-label="Icon emoji"
+                  />
+                ) : (
+                  <span className="text-2xl select-none">{h.icon}</span>
+                )}
+                <span className="font-mono text-[9px] font-bold text-yellow-400/50 tracking-widest tabular-nums">
+                  NO.{String(i + 1).padStart(4, "0")}
+                </span>
+              </div>
 
-            {editMode ? (
-              <textarea
-                value={h.description}
-                onChange={(e) => updateItem(i, { description: e.target.value })}
-                placeholder="Short description…"
-                rows={3}
-                className="bg-transparent text-xs text-white/50 leading-relaxed w-full outline-none focus:ring-1 focus:ring-yellow-400/20 rounded resize-none placeholder-white/15"
-              />
-            ) : (
-              <div className="text-xs text-white/50 leading-relaxed">{h.description}</div>
-            )}
+              {/* Tear line */}
+              <div className="border-t border-dashed border-yellow-400/25 my-1.5" />
+
+              {editMode ? (
+                <input
+                  value={h.title}
+                  onChange={(e) => updateItem(i, { title: e.target.value })}
+                  placeholder="Moment title"
+                  className="bg-transparent text-xs font-black text-white uppercase tracking-wide w-full outline-none focus:ring-1 focus:ring-yellow-400/20 rounded placeholder-white/20 mb-1 block"
+                />
+              ) : (
+                <div className="text-xs font-black text-white uppercase tracking-wide mb-1">{h.title}</div>
+              )}
+
+              {editMode ? (
+                <textarea
+                  value={h.description}
+                  onChange={(e) => updateItem(i, { description: e.target.value })}
+                  placeholder="Short description…"
+                  rows={3}
+                  className="bg-transparent text-[11px] text-white/50 leading-relaxed w-full outline-none focus:ring-1 focus:ring-yellow-400/20 rounded resize-none placeholder-white/15"
+                />
+              ) : (
+                <div className="text-[11px] text-white/50 leading-relaxed">{h.description}</div>
+              )}
+
+              <div className="mt-2 text-center font-mono text-[8px] text-yellow-400/25 tracking-[0.3em] uppercase select-none">
+                ✧ Redeem for prizes ✧
+              </div>
+            </div>
           </motion.div>
         ))}
 
@@ -658,10 +681,10 @@ function HighlightsSection({
                 { icon: "✨", title: "New moment", description: "Describe it…", _k: genKey("hl") },
               ])
             }
-            className="flex items-center justify-center gap-2 bg-[#111] border border-dashed border-yellow-400/15 rounded-2xl p-5 text-yellow-400/50 hover:text-yellow-400 hover:border-yellow-400/40 transition-colors min-h-30"
+            className="w-44 shrink-0 flex flex-col items-center justify-center gap-2 bg-yellow-400/3 border-2 border-dashed border-yellow-400/15 rounded-md p-5 text-yellow-400/50 hover:text-yellow-400 hover:border-yellow-400/40 transition-colors min-h-28"
           >
             <Plus size={16} />
-            <span className="text-sm">Add highlight</span>
+            <span className="text-xs">Add ticket</span>
           </motion.button>
         )}
       </motion.div>
@@ -896,74 +919,95 @@ function StatsSection({
   const updateItem = (i: number, patch: Partial<Stat>) =>
     update(stats.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
 
+  const digitGlow: React.CSSProperties = {
+    textShadow: "0 0 6px rgba(250,204,21,0.7), 0 0 18px rgba(250,204,21,0.35)",
+  };
+
   return (
     <div className="px-6 md:px-8 py-5" ref={ref}>
-      <SectionHeader>✦ Quick Stats</SectionHeader>
+      <SectionHeader>✦ High Score</SectionHeader>
+      {/* Arcade cabinet marquee frame around the score display */}
       <motion.div
-        className="grid grid-cols-2 md:grid-cols-4 gap-3"
+        className="relative bg-black border-4 border-yellow-400/25 rounded-md p-4 md:p-5 shadow-[inset_0_0_30px_rgba(0,0,0,0.8)]"
         variants={staggerContainer}
         initial="hidden"
         animate={inView ? "visible" : "hidden"}
       >
-        {stats.map((s, i) => (
-          <motion.div
-            key={s._k}
-            variants={{
-              hidden: { opacity: 0, scale: 0.85 },
-              visible: { opacity: 1, scale: 1, transition: { duration: 0.35 } },
-            }}
-            whileHover={editMode ? {} : { scale: 1.05, y: -3 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="relative bg-[#111] border border-yellow-400/10 rounded-2xl p-5 text-center hover:border-yellow-400/30 hover:shadow-lg hover:shadow-yellow-400/10 transition-shadow duration-300"
-          >
-            {editMode && (
-              <button
-                type="button"
-                onClick={() => update(stats.filter((_, idx) => idx !== i))}
-                className="absolute top-2 right-2 text-white/20 hover:text-red-400 transition-colors"
-                aria-label="Remove stat"
-              >
-                <Trash2 size={12} />
-              </button>
-            )}
+        {/* Bolt/rivet details on the cabinet frame corners */}
+        <div className="absolute top-1.5 left-1.5 w-1.5 h-1.5 rounded-full bg-yellow-400/20" />
+        <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-yellow-400/20" />
+        <div className="absolute bottom-1.5 left-1.5 w-1.5 h-1.5 rounded-full bg-yellow-400/20" />
+        <div className="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-yellow-400/20" />
 
-            {editMode ? (
-              <input
-                value={s.value}
-                onChange={(e) => updateItem(i, { value: e.target.value })}
-                placeholder="Value"
-                className="bg-transparent text-2xl font-black text-yellow-400 leading-none w-full text-center outline-none focus:ring-1 focus:ring-yellow-400/20 rounded placeholder-yellow-400/20"
-              />
-            ) : (
-              <div className="text-2xl font-black text-yellow-400 leading-none">{s.value}</div>
-            )}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-y divide-yellow-400/10 md:divide-y-0 md:divide-x">
+          {stats.map((s, i) => (
+            <motion.div
+              key={s._k}
+              variants={{
+                hidden: { opacity: 0, scale: 0.9 },
+                visible: { opacity: 1, scale: 1, transition: { duration: 0.35 } },
+              }}
+              className="relative text-center px-2 py-3 md:py-1 md:first:pl-0 md:last:pr-0"
+            >
+              {editMode && (
+                <button
+                  type="button"
+                  onClick={() => update(stats.filter((_, idx) => idx !== i))}
+                  className="absolute top-0 right-0 text-white/20 hover:text-red-400 transition-colors"
+                  aria-label="Remove stat"
+                >
+                  <Trash2 size={12} />
+                </button>
+              )}
 
-            {editMode ? (
-              <input
-                value={s.label}
-                onChange={(e) => updateItem(i, { label: e.target.value })}
-                placeholder="Label"
-                className="bg-transparent text-[11px] text-white/40 mt-2 font-medium uppercase tracking-wider w-full text-center outline-none focus:ring-1 focus:ring-yellow-400/20 rounded placeholder-white/15"
-              />
-            ) : (
-              <div className="text-[11px] text-white/40 mt-2 font-medium uppercase tracking-wider">
-                {s.label}
+              <div className="font-mono text-[9px] text-yellow-400/40 uppercase tracking-[0.2em] mb-1">
+                P{i + 1}
               </div>
-            )}
-          </motion.div>
-        ))}
 
-        {editMode && (
-          <motion.button
-            variants={{ hidden: { opacity: 0, scale: 0.85 }, visible: { opacity: 1, scale: 1 } }}
-            type="button"
-            onClick={() => update([...stats, { value: "—", label: "New stat", _k: genKey("st") }])}
-            className="flex items-center justify-center gap-1.5 bg-[#111] border border-dashed border-yellow-400/15 rounded-2xl p-5 text-yellow-400/50 hover:text-yellow-400 hover:border-yellow-400/40 transition-colors"
-          >
-            <Plus size={14} />
-            <span className="text-xs">Add stat</span>
-          </motion.button>
-        )}
+              {editMode ? (
+                <input
+                  value={s.value}
+                  onChange={(e) => updateItem(i, { value: e.target.value })}
+                  placeholder="000"
+                  style={digitGlow}
+                  className="bg-transparent font-mono text-2xl md:text-3xl font-bold text-yellow-400 tabular-nums leading-none w-full text-center outline-none focus:ring-1 focus:ring-yellow-400/20 rounded placeholder-yellow-400/20"
+                />
+              ) : (
+                <div
+                  style={digitGlow}
+                  className="font-mono text-2xl md:text-3xl font-bold text-yellow-400 tabular-nums leading-none"
+                >
+                  {s.value}
+                </div>
+              )}
+
+              {editMode ? (
+                <input
+                  value={s.label}
+                  onChange={(e) => updateItem(i, { label: e.target.value })}
+                  placeholder="Label"
+                  className="bg-transparent text-[10px] text-yellow-100/40 mt-1.5 font-mono uppercase tracking-wider w-full text-center outline-none focus:ring-1 focus:ring-yellow-400/20 rounded placeholder-white/15"
+                />
+              ) : (
+                <div className="text-[10px] text-yellow-100/40 mt-1.5 font-mono uppercase tracking-wider">
+                  {s.label}
+                </div>
+              )}
+            </motion.div>
+          ))}
+
+          {editMode && (
+            <motion.button
+              variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1 } }}
+              type="button"
+              onClick={() => update([...stats, { value: "000", label: "New stat", _k: genKey("st") }])}
+              className="flex items-center justify-center gap-1.5 text-yellow-400/40 hover:text-yellow-400 transition-colors py-3"
+            >
+              <Plus size={14} />
+              <span className="text-xs font-mono">Add</span>
+            </motion.button>
+          )}
+        </div>
       </motion.div>
     </div>
   );
@@ -994,77 +1038,102 @@ function TimelineSection({
   const updateItem = (i: number, patch: Partial<TimelineStep>) =>
     update(steps.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
 
+  // Cycle of level icons — bowling → arcade → go-kart → repeat, like world-map stage nodes
+  const LEVEL_ICONS = ["🎳", "🕹️", "🏎️", "⭐"] as const;
+
   return (
     <div className="px-6 md:px-8 py-5" ref={ref}>
-      <SectionHeader>✦ How the Night Unfolded</SectionHeader>
+      <SectionHeader>✦ Level Select</SectionHeader>
       <motion.div
-        className="relative ml-3"
+        className="relative overflow-x-auto pb-2"
         variants={staggerContainer}
         initial="hidden"
         animate={inView ? "visible" : "hidden"}
       >
-        {/* Vertical line */}
-        <div className="absolute left-0 top-2 bottom-2 w-px bg-yellow-400/20" />
-        <div className="space-y-6">
-          {steps.map((step, i) => (
-            <motion.div key={step._k} variants={fadeUp} className="relative pl-7">
-              {/* Timeline dot */}
-              <div className="absolute left-0 top-1.5 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-yellow-400 ring-4 ring-yellow-400/10" />
+        <div className="flex items-start gap-1 min-w-max px-1 pt-6">
+          {steps.map((step, i) => {
+            const isLast = i === steps.length - 1;
+            const bump = i % 2 === 0 ? "-translate-y-2" : "translate-y-2";
+            return (
+              <div key={step._k} className="flex items-start">
+                <motion.div variants={fadeUp} className={`relative flex flex-col items-center w-32 ${bump}`}>
+                  {editMode && (
+                    <button
+                      type="button"
+                      onClick={() => update(steps.filter((_, idx) => idx !== i))}
+                      className="absolute -top-5 right-0 text-white/20 hover:text-red-400 transition-colors"
+                      aria-label="Remove level"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  )}
 
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                {editMode ? (
-                  <input
-                    value={step.time ?? ""}
-                    onChange={(e) => updateItem(i, { time: e.target.value })}
-                    placeholder="Time"
-                    className="bg-yellow-400/10 border border-yellow-400/20 text-[10px] font-bold text-yellow-400 rounded-full px-2 py-0.5 uppercase tracking-wider w-24 outline-none focus:border-yellow-400/50"
-                  />
-                ) : (
-                  step.time && (
-                    <span className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-2 py-0.5 uppercase tracking-wider">
-                      {step.time}
+                  {/* Level node — a game-map stage marker, not a timeline dot */}
+                  <div className="relative w-14 h-14 rounded-full bg-[#111] border-2 border-yellow-400/50 flex items-center justify-center shadow-[0_0_14px_rgba(250,204,21,0.15)]">
+                    <span className="text-2xl select-none">{LEVEL_ICONS[i % LEVEL_ICONS.length]}</span>
+                    <span className="absolute -bottom-1.5 -right-1.5 bg-yellow-400 text-black text-[9px] font-black rounded-full w-5 h-5 flex items-center justify-center border-2 border-[#090909]">
+                      {i + 1}
                     </span>
-                  )
-                )}
+                  </div>
 
-                {editMode ? (
-                  <input
-                    value={step.title}
-                    onChange={(e) => updateItem(i, { title: e.target.value })}
-                    placeholder="Step title"
-                    className="bg-transparent text-sm font-bold text-white flex-1 outline-none focus:ring-1 focus:ring-yellow-400/20 rounded placeholder-white/20 min-w-20"
+                  {editMode ? (
+                    <input
+                      value={step.time ?? ""}
+                      onChange={(e) => updateItem(i, { time: e.target.value })}
+                      placeholder="Time"
+                      className="bg-yellow-400/10 border border-yellow-400/20 text-[9px] font-bold text-yellow-400 rounded-full px-2 py-0.5 uppercase tracking-wider mt-2 w-full text-center outline-none focus:border-yellow-400/50"
+                    />
+                  ) : (
+                    step.time && (
+                      <span className="text-[9px] font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-2 py-0.5 uppercase tracking-wider mt-2">
+                        {step.time}
+                      </span>
+                    )
+                  )}
+
+                  {editMode ? (
+                    <input
+                      value={step.title}
+                      onChange={(e) => updateItem(i, { title: e.target.value })}
+                      placeholder="Level name"
+                      className="bg-transparent text-xs font-bold text-white text-center w-full mt-1.5 outline-none focus:ring-1 focus:ring-yellow-400/20 rounded placeholder-white/20"
+                    />
+                  ) : (
+                    <span className="text-xs font-bold text-white text-center mt-1.5">{step.title}</span>
+                  )}
+
+                  {editMode ? (
+                    <textarea
+                      value={step.description ?? ""}
+                      onChange={(e) => updateItem(i, { description: e.target.value })}
+                      placeholder="What happened…"
+                      rows={2}
+                      className="bg-transparent text-[10px] text-white/50 leading-relaxed w-full text-center mt-1 outline-none focus:ring-1 focus:ring-yellow-400/20 rounded resize-none placeholder-white/15"
+                    />
+                  ) : (
+                    step.description && (
+                      <p className="text-[10px] text-white/50 leading-relaxed text-center mt-1">
+                        {step.description}
+                      </p>
+                    )
+                  )}
+                </motion.div>
+
+                {/* Connecting path segment between level nodes */}
+                {!isLast && (
+                  <div
+                    className={`w-10 h-0.5 bg-linear-to-r from-yellow-400/50 to-yellow-400/50 mt-7 shrink-0 ${
+                      i % 2 === 0 ? "-translate-y-2" : "translate-y-2"
+                    }`}
+                    style={{
+                      backgroundImage:
+                        "repeating-linear-gradient(90deg, rgba(250,204,21,0.5) 0 4px, transparent 4px 8px)",
+                    }}
                   />
-                ) : (
-                  <span className="text-sm font-bold text-white">{step.title}</span>
-                )}
-
-                {editMode && (
-                  <button
-                    type="button"
-                    onClick={() => update(steps.filter((_, idx) => idx !== i))}
-                    className="ml-auto text-white/20 hover:text-red-400 transition-colors"
-                    aria-label="Remove step"
-                  >
-                    <Trash2 size={13} />
-                  </button>
                 )}
               </div>
-
-              {editMode ? (
-                <textarea
-                  value={step.description ?? ""}
-                  onChange={(e) => updateItem(i, { description: e.target.value })}
-                  placeholder="What happened here…"
-                  rows={2}
-                  className="bg-transparent text-xs text-white/50 leading-relaxed w-full outline-none focus:ring-1 focus:ring-yellow-400/20 rounded resize-none placeholder-white/15"
-                />
-              ) : (
-                step.description && (
-                  <p className="text-xs text-white/50 leading-relaxed">{step.description}</p>
-                )
-              )}
-            </motion.div>
-          ))}
+            );
+          })}
 
           {editMode && (
             <motion.button
@@ -1073,14 +1142,15 @@ function TimelineSection({
               onClick={() =>
                 update([
                   ...steps,
-                  { time: "", title: "New step", description: "", _k: genKey("tl") },
+                  { time: "", title: "New level", description: "", _k: genKey("tl") },
                 ])
               }
-              className="relative pl-7 flex items-center gap-2 text-yellow-400/50 hover:text-yellow-400 transition-colors"
+              className="flex flex-col items-center justify-center gap-1.5 w-32 text-yellow-400/50 hover:text-yellow-400 transition-colors shrink-0"
             >
-              <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border border-yellow-400/40" />
-              <Plus size={14} />
-              <span className="text-sm">Add step</span>
+              <div className="w-14 h-14 rounded-full border-2 border-dashed border-yellow-400/30 flex items-center justify-center">
+                <Plus size={18} />
+              </div>
+              <span className="text-xs">Add level</span>
             </motion.button>
           )}
         </div>
@@ -1119,23 +1189,33 @@ function CTASection({
   };
 
   return (
-    <div className="px-6 md:px-8 py-6 border-t border-yellow-400/10">
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+    <div className="relative px-6 md:px-8 py-8 border-t border-yellow-400/10 bg-[repeating-linear-gradient(135deg,rgba(250,204,21,0.02)_0px,rgba(250,204,21,0.02)_10px,transparent_10px,transparent_20px)] text-center overflow-hidden">
+      {/* Blinking arcade-cabinet prompt */}
+      <motion.div
+        animate={{ opacity: [1, 1, 0.15, 1] }}
+        transition={{ duration: 1.2, repeat: Infinity, times: [0, 0.5, 0.75, 1] }}
+        className="font-mono text-[11px] font-bold text-yellow-400 uppercase tracking-[0.35em] mb-4 flex items-center justify-center gap-2"
+      >
+        <Coins size={13} />
+        Insert Coin to Continue
+      </motion.div>
+
+      <div className="flex flex-col items-center gap-3">
         <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
           type="button"
-          className="w-full sm:w-auto px-6 py-2.5 bg-yellow-400 text-black text-sm font-bold rounded-full hover:bg-yellow-300 transition-colors"
+          className="relative px-8 py-3 bg-yellow-400 text-black text-sm font-black uppercase tracking-widest rounded-sm hover:bg-yellow-300 transition-colors shadow-[0_0_25px_rgba(250,204,21,0.35)]"
         >
           {editMode ? (
             <input
               value={primaryText}
               onChange={(e) => updatePrimary(e.target.value)}
-              className="bg-transparent text-black font-bold text-sm text-center w-full outline-none"
+              className="bg-transparent text-black font-black text-sm uppercase tracking-widest text-center w-full outline-none"
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
-            primaryText
+            <>▶ {primaryText}</>
           )}
         </motion.button>
 
@@ -1143,13 +1223,13 @@ function CTASection({
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           type="button"
-          className="w-full sm:w-auto px-6 py-2.5 border border-yellow-400/30 text-yellow-400 text-sm font-semibold rounded-full hover:border-yellow-400/60 hover:bg-yellow-400/5 transition-colors"
+          className="text-yellow-400/60 text-xs font-mono uppercase tracking-widest hover:text-yellow-400 transition-colors underline decoration-dashed underline-offset-4"
         >
           {editMode ? (
             <input
               value={secondaryText}
               onChange={(e) => updateSecondary(e.target.value)}
-              className="bg-transparent text-yellow-400 font-semibold text-sm text-center w-full outline-none"
+              className="bg-transparent text-yellow-400/60 font-mono text-xs uppercase tracking-widest text-center outline-none"
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
@@ -1157,7 +1237,7 @@ function CTASection({
           )}
         </motion.button>
 
-        <div className="flex items-center gap-2 sm:ml-auto">
+        <div className="flex items-center gap-3 mt-2">
           {SHARE_ICONS.map(({ id, Icon }) => (
             <motion.button
               key={id}
