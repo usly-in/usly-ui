@@ -7,6 +7,9 @@ import { NightMode } from "./NightMode";
 import { Vinyl } from "./Vinyl";
 import { BirthdayBash } from "./BirthdayBash";
 import CakeParallax from "./CakeParallax";
+import { TicketMarquee } from "./TicketMarquee";
+import { VHSCamcorder } from "./VHSCamcorder";
+import { PolaroidCorkboard } from "./PolaroidCorkboard";
 
 export type { TemplateProps, TemplateEntry };
 
@@ -19,6 +22,9 @@ export const TEMPLATE_MAP: Record<string, ComponentType<TemplateProps>> = {
   "music-sharing": Vinyl,
   "birthday-bash": BirthdayBash,
   "cake-parallax": CakeParallax,
+  "ticket-marquee": TicketMarquee,
+  "vhs-camcorder": VHSCamcorder,
+  "polaroid-corkboard": PolaroidCorkboard,
 };
 
 /** Ordered list used by pickers and renderers */
@@ -103,6 +109,42 @@ export const TEMPLATE_LIST: TemplateEntry[] = [
       title: "Cake Time",
       caption: "Layered cake with parallax",
       story: "Happy Birthday!",
+    },
+  },
+  {
+    id: "ticket-marquee",
+    name: "Ticket & Marquee",
+    tag: "Sunset + Honest Talk",
+    emoji: "🎟️",
+    placeholders: {
+      title: "Watching the sky change",
+      caption: "A quiet rooftop, just us and the horizon",
+      story:
+        "Found a quiet rooftop and sat down to watch the sky. The kind of conversation that wanders into future dreams — no destination, no rush.",
+    },
+  },
+  {
+    id: "vhs-camcorder",
+    name: "VHS Camcorder",
+    tag: "Sunset + Honest Talk",
+    emoji: "📼",
+    placeholders: {
+      title: "Watching the sky change",
+      caption: "A quiet rooftop, just us and the horizon",
+      story:
+        "Found a quiet rooftop and sat down to watch the sky. The kind of conversation that wanders into future dreams — no destination, no rush.",
+    },
+  },
+  {
+    id: "polaroid-corkboard",
+    name: "Polaroid & Corkboard",
+    tag: "Sunset + Honest Talk",
+    emoji: "📌",
+    placeholders: {
+      title: "Watching the sky change",
+      caption: "A quiet rooftop, just us and the horizon",
+      story:
+        "Found a quiet rooftop and sat down to watch the sky. The kind of conversation that wanders into future dreams — no destination, no rush.",
     },
   },
 ];
